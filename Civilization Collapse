@@ -6,6 +6,7 @@
 
 // TANIM 
 // 125 farklı ülkenin 145 farklı başlıkta makro ekonomik verilerini derleyen istatistiki bir indikatördür. 
+// (Tradingview'da kullanılabilir.) 
 
 // YÖNTEM
 // Ülke sembolü ve data değiştirilerek sonuçlar çağrılabilir, kıyaslamalar yapılabilir. 
