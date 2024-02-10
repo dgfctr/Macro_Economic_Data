@@ -1,989 +1,746 @@
-// Author : dg_factor [11.07.2023, Istanbul]
+// Author : © dg_factor [11.07.2023, Istanbul]
 
-// NOT
-// Çalışma ekonomisinde uzman genç bir akademisyen arkadaşın deyimiyle; "Bu indikatörden elli tane makale çıkar!" 
+NOT
+// Çalışma ekonomisinde uzman genç bir akademisyen arkadaşın deyimiyle; "Bu indikatörden elli tane makale çıkar!"
 // Bence çıkmaz, sembol çağrıyor sadece :) Ama kenarda bulunsun.
 
-// TANIM 
-// 125 farklı ülkenin 145 farklı başlıkta makro ekonomik verilerini derleyen istatistiki bir indikatördür. 
-// (Tradingview'da kullanılabilir.) 
+// VIDEO
+// www.youtube.com/watch?v=PCrbA6lR...
+
+// TANIM
+// 125 farklı ülkenin 145 farklı başlıkta makro ekonomik verilerini derleyen istatistiki bir indikatördür.
+// Saray rejiminin (💩) tercih ettiği geçmiş irrasyonel ekonomi politikalarının ve şimdiki "rasyonelliğin" üreteceği ağır bedeli grafikten günbegün izleyelim!
+
+// NE İŞE YARAYACAK?
+// 📌Batı bizi kıskanıyor mu, onu görürüz! 🤦‍♂️
+// 📌"Ekonomi-Politiğin Eleştirisine Katkı" sağlarsa kendimi birayla ödüllendiririm🍺
+// 📌Bakınız Türkiye nüfusunun, işsizlik oranının ya da yolsuzluk sıralamasının üzerine Bollinger Band atılabilir! :)
 
 // YÖNTEM
-// Ülke sembolü ve data değiştirilerek sonuçlar çağrılabilir, kıyaslamalar yapılabilir. 
+// Ülke sembolü ve data değiştirilerek sonuçlar çağrılabilir, kıyaslamalar yapılabilir.
 // Sonuçlar üç farklı para biriminde (Dolar, Euro ve Türk Lirası) görüntülenebilir.
 // Daha geniş tarihsel aralıkta ve doğru(*) veri tabanına ulaşmak için, sonuçların FX:USDTRY sembolünün 6 aylık grafiğinde izlenmesi önerilir.
 
 // (*)UYARI
-// Bu komut dosyası, verilere kolay erişim sağlamak amacıyla hazırlandı. İçerik, Tradingview'ın sunduğu sınırlı datadan ibarettir. 
-// Sonuçların bağımsız kaynaklarla denetlenmesi objektif güvenilirlik açısından önemlidir. 
-// İndikatörde listelenmiş olan başlıklar Türkiye için tanımlı sonuç üretmektedir. 
-// Fakat seçtiğiniz diğer ülkeler için veri yoksa indikatör bir çalışma hatası verir. 
+// Bu komut dosyası, verilere kolay erişim sağlamak amacıyla hazırlandı. İçerik, Tradingview'ın sunduğu sınırlı datadan ibarettir.
+// Sonuçların bağımsız kaynaklarla denetlenmesi objektif güvenilirlik açısından önemlidir.
+// İndikatörde listelenmiş olan başlıklar Türkiye için tanımlı sonuç üretmektedir.
+// Fakat seçtiğiniz diğer ülkeler için veri yoksa indikatör bir çalışma hatası verir.
 // Tradingview'daki orijinal grafiğe bilgi panelinde yer alan sembolden yararlanarak ulaşabilirsiniz.
 // Bazı başlıklarda sunulan veriler eski tarihli olabilir, bilgi panelindeki son değişim tarihine dikkat ediniz.
 // Bazı metrikler sayı, yüzde, oran, endkes puanı, ton, varil, joule, GWh vb ölçü birimleri içerir. Birim açıklamasına dikkat ediniz.
-// Kurdaki öngörülemez artış nedeniyle, verilere ait son değişim tarihindeki dolar/euro fiyatının baz alınması önerilir. 
+// Kurdaki öngörülemez artış nedeniyle, verilere ait son değişim tarihindeki dolar/euro fiyatının baz alınması önerilir.
 // Aynı nedenle dolar/euro bazlı sonuçlar "yaklaşık değer" olarak yorumlanmalıdır.
 // Bazı başlıklar, kaynak niteliğindeki farklılık nedeniyle dolaylı kıyaslama yöntemlerini zorunlu kılabilir. Örneğin;
 // "Asgari Ücret" Türkiye kaynaklarında aylık bir ücret iken, ABD kaynaklarında saatlik ücret olarak sunulmaktadır.
-// Söz konusu başlıklar komut dosyasının ağırlaşmaması için henüz kategorize edilmedi. 
+// Söz konusu başlıklar komut dosyasının ağırlaşmaması için henüz kategorize edilmedi.
 // (Gözlemlediğiniz hataları/farklılıkları lütfen bildiriniz.)
 
 // GELİŞTİRMELER
 // Süreç içerisinde muhtelif analiz yöntemleri de eklenecek, önerileri iletebilirsiniz. Ve hatta lütfen iletiniz...
 // Çeviri hataları söz konusuysa lütfen bildiriniz.
-// Güncellemeleri Twitter ve Github hesaplarımdan takip edebilirsiniz. 
+// Güncellemeleri Twitter ve Github hesaplarımdan takip edebilirsiniz.
 
 // SOUNDTRACK & TITLE
 // Kodlarken arka fonda çalıp durdu!
-// https://www.youtube.com/watch?v=EApMitnsXgg
+// Kreator - Civilization Collapse
+// www.youtube.com/watch?v=EApMitns...
+
+// Kaynakların kullanımı için ilgili linkler :
+// www.tradingview.com/...s-available-in-pine/
+// www.tradingview.com/...about-economic-data/
+// www.tradingview.com/...economic-indicators/
 
 //@version=5
-indicator("Civilization Collapse", precision=2)
+indicator("Civilization Collapse")
 
-gr_d = "MAKRO EKONOMİK DATA"
-ulke = input.string(title="Ülke  ", defval="Türkiye", inline="i", group=gr_d, options=[
-  "Türkiye"            ,
-  "ABD"                ,
-  "Afganistan"         ,
-  "Almanya"            ,
-  "Angola"             ,
-  "Arjantin"           ,
-  "Arnavutluk"         ,
-  "Avrupa Birliği"     ,
-  "Avustralya"         ,
-  "Avusturya"          ,
-  "Azerbaycan"         ,
-  "BAE"                ,
-  "Bangladeş"          ,
-  "Belarus"            ,
-  "Belçika"            ,
-  "Bolivya"            ,
-  "Bosna Hersek"       ,
-  "Brezilya"           ,
-  "Bulgaristan"        ,
-  "Cezayir"            ,
-  "Çek Cumhuriyeti"    ,
-  "Çin"                ,
-  "Danimarka"          ,
-  "Ekvador"            ,
-  "Endonezya"          ,
-  "Ermenistan"         ,
-  "Estonya"            ,
-  "Etiyopya"           ,
-  "Fas"                ,
-  "Fildişi Sahili"     ,
-  "Filipinler"         ,
-  "Filistin"           ,
-  "Finlandiya"         ,
-  "Fransa"             ,
-  "Grönland"           ,
-  "Guatemala"          ,
-  "Güney Afrika"       ,
-  "Güney Kore"         ,
-  "Gürcistan"          ,
-  "Hırvatistan"        ,
-  "Hindistan"          ,
-  "Hollanda"           ,
-  "Honduras"           ,
-  "Hong Kong"          ,
-  "Irak"               ,
-  "İngiltere"          ,
-  "İran"               ,
-  "İrlanda"            ,
-  "İspanya"            ,
-  "İsrail"             ,
-  "İsveç"              ,
-  "İsviçre"            ,
-  "İtalya"             ,
-  "İzlanda"            ,
-  "Jamaika"            ,
-  "Japonya"            ,
-  "Kamboçya"           ,
-  "Kamerun"            ,
-  "Kanada"             ,
-  "Katar"              ,
-  "Kazakistan"         ,
-  "Kenya"              ,
-  "Kıbrıs"             ,
-  "Kırgızistan"        ,
-  "Kolombiya"          ,
-  "Kosova"             ,
-  "Kuveyt"             ,
-  "Kuzey Kore"         ,
-  "Küba"               ,
-  "Letonya"            ,
-  "Libya"              ,
-  "Litvanya"           ,
-  "Lübnan"             ,
-  "Lüksemburg"         ,
-  "Macaristan"         ,
-  "Madagaskar"         ,
-  "Makedonya"          ,
-  "Maldivler"          ,
-  "Malezya"            ,
-  "Malta"              ,
-  "Man Adası"          ,
-  "Meksika"            ,
-  "Mısır"              ,
-  "Moğolistan"         ,
-  "Moldova"            ,
-  "Mozambik"           ,
-  "Myanmar"            ,
-  "Nepal"              ,
-  "Nijerya"            ,
-  "Nikaragua"          ,
-  "Norveç"             ,
-  "Özbekistan"         ,
-  "Pakistan"           ,
-  "Paraguay"           ,
-  "Peru"               ,
-  "Polonya"            ,
-  "Portekiz"           ,
-  "Porto Riko"         ,
-  "Romanya"            ,
-  "Ruanda"             ,
-  "Rusya"              ,
-  "Senegal"            ,
-  "Sırbistan"          ,
-  "Singapur"           ,
-  "Slovakya"           ,
-  "Slovenya"           ,
-  "Somali"             ,
-  "Sudan"              ,
-  "Suriye"             ,
-  "Suudi Arabistan"    ,
-  "Şili"               ,
-  "Tacikistan"         ,
-  "Tayland"            ,
-  "Tayvan"             ,
-  "Tunus"              ,
-  "Türkmenistan"       ,
-  "Uganda"             ,
-  "Ukrayna"            ,
-  "Uruguay"            ,
-  "Ürdün"              ,
-  "Venezuela"          ,
-  "Vietnam"            ,
-  "Yeni Zelanda"       ,
-  "Yunanistan"         ,
-  "Zimbabve"           
+// CONSTATNTS
+string gr_d    = "MAKRO EKONOMİK DATA"
+string uyari_t = "UYARI:\n\nSonuçların FX:USDTRY sembolünün\n\n6 aylık grafiğinde izlenmesi önerilir."
+
+// INPUTS
+ulke = input.string(title="Ülke  ", defval="1. Türkiye [TR]", inline="i", group=gr_d, options=[
+  "1. "   + "Türkiye"           + " [TR]",
+  "2. "   + "ABD"               + " [US]",
+  "3. "   + "Afganistan"        + " [AF]",
+  "4. "   + "Almanya"           + " [DE]",
+  "5. "   + "Angola"            + " [AO]",
+  "6. "   + "Arjantin"          + " [AR]",
+  "7. "   + "Arnavutluk"        + " [AL]",
+  "8. "   + "Avrupa Birliği"    + " [EU]",
+  "9. "   + "Avustralya"        + " [AU]",
+  "10. "  + "Avusturya"         + " [AT]",
+  "11. "  + "Azerbaycan"        + " [AZ]",
+  "12. "  + "BAE"               + " [AE]",
+  "13. "  + "Bangladeş"         + " [BD]",
+  "14. "  + "Belarus"           + " [BY]",
+  "15. "  + "Belçika"           + " [BE]",
+  "16. "  + "Bolivya"           + " [BO]",
+  "17. "  + "Bosna Hersek"      + " [BA]",
+  "18. "  + "Brezilya"          + " [BR]",
+  "19. "  + "Bulgaristan"       + " [BG]",
+  "20. "  + "Cezayir"           + " [DZ]",
+  "21. "  + "Çek Cumhuriyeti"   + " [CZ]",
+  "22. "  + "Çin"               + " [CN]",
+  "23. "  + "Danimarka"         + " [DK]",
+  "24. "  + "Ekvador"           + " [EC]",
+  "25. "  + "Endonezya"         + " [ID]",
+  "26. "  + "Ermenistan"        + " [AM]",
+  "27. "  + "Estonya"           + " [EE]",
+  "28. "  + "Etiyopya"          + " [ET]",
+  "29. "  + "Fas"               + " [MA]",
+  "30. "  + "Fildişi Sahili"    + " [CI]",
+  "31. "  + "Filipinler"        + " [PH]",
+  "32. "  + "Filistin"          + " [PS]",
+  "33. "  + "Finlandiya"        + " [FI]",
+  "34. "  + "Fransa"            + " [FR]",
+  "35. "  + "Grönland"          + " [GL]",
+  "36. "  + "Guatemala"         + " [GT]",
+  "37. "  + "Güney Afrika"      + " [ZA]",
+  "38. "  + "Güney Kore"        + " [KR]",
+  "39. "  + "Gürcistan"         + " [GE]",
+  "40. "  + "Hırvatistan"       + " [HR]",
+  "41. "  + "Hindistan"         + " [IN]",
+  "42. "  + "Hollanda"          + " [NL]",
+  "43. "  + "Honduras"          + " [HN]",
+  "44. "  + "Hong Kong"         + " [HK]",
+  "45. "  + "Irak"              + " [IQ]",
+  "46. "  + "İngiltere"         + " [GB]",
+  "47. "  + "İran"              + " [IR]",
+  "48. "  + "İrlanda"           + " [IE]",
+  "49. "  + "İspanya"           + " [ES]",
+  "50. "  + "İsrail"            + " [IL]",
+  "51. "  + "İsveç"             + " [SE]",
+  "52. "  + "İsviçre"           + " [CH]",
+  "53. "  + "İtalya"            + " [IT]",
+  "54. "  + "İzlanda"           + " [IS]",
+  "55. "  + "Jamaika"           + " [JM]",
+  "56. "  + "Japonya"           + " [JP]",
+  "57. "  + "Kamboçya"          + " [KH]",
+  "58. "  + "Kamerun"           + " [CM]",
+  "59. "  + "Kanada"            + " [CA]",
+  "60. "  + "Katar"             + " [QA]",
+  "61. "  + "Kazakistan"        + " [KZ]",
+  "62. "  + "Kenya"             + " [KE]",
+  "63. "  + "Kıbrıs"            + " [CY]",
+  "64. "  + "Kırgızistan"       + " [KG]",
+  "65. "  + "Kolombiya"         + " [CO]",
+  "66. "  + "Kosova"            + " [XK]",
+  "67. "  + "Kuveyt"            + " [KW]",
+  "68. "  + "Kuzey Kore"        + " [KP]",
+  "69. "  + "Küba"              + " [CU]",
+  "70. "  + "Letonya"           + " [LV]",
+  "71. "  + "Libya"             + " [LY]",
+  "72. "  + "Litvanya"          + " [LT]",
+  "73. "  + "Lübnan"            + " [LB]",
+  "74. "  + "Lüksemburg"        + " [LU]",
+  "75. "  + "Macaristan"        + " [HU]",
+  "76. "  + "Madagaskar"        + " [MG]",
+  "77. "  + "Makedonya"         + " [MK]",
+  "78. "  + "Maldivler"         + " [MV]",
+  "79. "  + "Malezya"           + " [MY]",
+  "80. "  + "Malta"             + " [MT]",
+  "81. "  + "Man Adası"         + " [IM]",
+  "82. "  + "Meksika"           + " [MX]",
+  "83. "  + "Mısır"             + " [EG]",
+  "84. "  + "Moğolistan"        + " [MN]",
+  "85. "  + "Moldova"           + " [MD]",
+  "86. "  + "Mozambik"          + " [MZ]",
+  "87. "  + "Myanmar"           + " [MM]",
+  "88. "  + "Nepal"             + " [NP]",
+  "89. "  + "Nijerya"           + " [NG]",
+  "90. "  + "Nikaragua"         + " [NI]",
+  "91. "  + "Norveç"            + " [NO]",
+  "92. "  + "Özbekistan"        + " [UZ]",
+  "93. "  + "Pakistan"          + " [PK]",
+  "94. "  + "Paraguay"          + " [PY]",
+  "95. "  + "Peru"              + " [PE]",
+  "96. "  + "Polonya"           + " [PL]",
+  "97. "  + "Portekiz"          + " [PT]",
+  "98. "  + "Porto Riko"        + " [PR]",
+  "99. "  + "Romanya"           + " [RO]",
+  "100. " + "Ruanda"            + " [RW]",
+  "101. " + "Rusya"             + " [RU]",
+  "102. " + "Senegal"           + " [SN]",
+  "103. " + "Sırbistan"         + " [RS]",
+  "104. " + "Singapur"          + " [SG]",
+  "105. " + "Slovakya"          + " [SK]",
+  "106. " + "Slovenya"          + " [SI]",
+  "107. " + "Somali"            + " [SO]",
+  "108. " + "Sudan"             + " [SD]",
+  "109. " + "Suriye"            + " [SY]",
+  "110. " + "Suudi Arabistan"   + " [SA]",
+  "111. " + "Şili"              + " [CL]",
+  "112. " + "Tacikistan"        + " [TJ]",
+  "113. " + "Tayland"           + " [TH]",
+  "114. " + "Tayvan"            + " [TW]",
+  "115. " + "Tunus"             + " [TN]",
+  "116. " + "Türkmenistan"      + " [TM]",
+  "117. " + "Uganda"            + " [UG]",
+  "118. " + "Ukrayna"           + " [UA]",
+  "119. " + "Uruguay"           + " [UY]",
+  "120. " + "Ürdün"             + " [JO]",
+  "121. " + "Venezuela"         + " [VE]",
+  "122. " + "Vietnam"           + " [VN]",
+  "123. " + "Yeni Zelanda"      + " [NZ]",
+  "124. " + "Yunanistan"        + " [GR]",
+  "125. " + "Zimbabve"          + " [ZW]"
   ])
 //
 
-ulke_sym = 
-  ulke == "Türkiye"            ? "TR"  :
-  ulke == "ABD"                ? "US"  :
-  ulke == "Afganistan"         ? "AF"  :
-  ulke == "Almanya"            ? "DE"  :
-  ulke == "Angola"             ? "AO"  :
-  ulke == "Arjantin"           ? "AR"  :
-  ulke == "Arnavutluk"         ? "AL"  :
-  ulke == "Avrupa Birliği"     ? "EU"  :
-  ulke == "Avustralya"         ? "AU"  :
-  ulke == "Avusturya"          ? "AT"  :
-  ulke == "Azerbaycan"         ? "AZ"  :
-  ulke == "BAE"                ? "AE"  :
-  ulke == "Bangladeş"          ? "BD"  :
-  ulke == "Belarus"            ? "BY"  :
-  ulke == "Belçika"            ? "BE"  :
-  ulke == "Bolivya"            ? "BO"  :
-  ulke == "Bosna Hersek"       ? "BA"  :
-  ulke == "Brezilya"           ? "BR"  :
-  ulke == "Bulgaristan"        ? "BG"  :
-  ulke == "Cezayir"            ? "DZ"  :
-  ulke == "Çek Cumhuriyeti"    ? "CZ"  :
-  ulke == "Çin"                ? "CN"  :
-  ulke == "Danimarka"          ? "DK"  :
-  ulke == "Ekvador"            ? "EC"  :
-  ulke == "Endonezya"          ? "ID"  :
-  ulke == "Ermenistan"         ? "AM"  :
-  ulke == "Estonya"            ? "EE"  :
-  ulke == "Etiyopya"           ? "ET"  :
-  ulke == "Fas"                ? "MA"  :
-  ulke == "Fildişi Sahili"     ? "CI"  :
-  ulke == "Filipinler"         ? "PH"  :
-  ulke == "Filistin"           ? "PS"  :
-  ulke == "Finlandiya"         ? "FI"  :
-  ulke == "Fransa"             ? "FR"  :
-  ulke == "Grönland"           ? "GL"  :
-  ulke == "Guatemala"          ? "GT"  :
-  ulke == "Güney Afrika"       ? "ZA"  :
-  ulke == "Güney Kore"         ? "KR"  :
-  ulke == "Gürcistan"          ? "GE"  :
-  ulke == "Hırvatistan"        ? "HR"  :
-  ulke == "Hindistan"          ? "IN"  :
-  ulke == "Hollanda"           ? "NL"  :
-  ulke == "Honduras"           ? "HN"  :
-  ulke == "Hong Kong"          ? "HK"  :
-  ulke == "Irak"               ? "IQ"  :
-  ulke == "İngiltere"          ? "GB"  :
-  ulke == "İran"               ? "IR"  :
-  ulke == "İrlanda"            ? "IE"  :
-  ulke == "İspanya"            ? "ES"  :
-  ulke == "İsrail"             ? "IL"  :
-  ulke == "İsveç"              ? "SE"  :
-  ulke == "İsviçre"            ? "CH"  :
-  ulke == "İtalya"             ? "IT"  :
-  ulke == "İzlanda"            ? "IS"  :
-  ulke == "Jamaika"            ? "JM"  :
-  ulke == "Japonya"            ? "JP"  :
-  ulke == "Kamboçya"           ? "KH"  :
-  ulke == "Kamerun"            ? "CM"  :
-  ulke == "Kanada"             ? "CA"  :
-  ulke == "Katar"              ? "QA"  :
-  ulke == "Kazakistan"         ? "KZ"  :
-  ulke == "Kenya"              ? "KE"  :
-  ulke == "Kıbrıs"             ? "CY"  :
-  ulke == "Kırgızistan"        ? "KG"  :
-  ulke == "Kolombiya"          ? "CO"  :
-  ulke == "Kosova"             ? "XK"  :
-  ulke == "Kuveyt"             ? "KW"  :
-  ulke == "Kuzey Kore"         ? "KP"  :
-  ulke == "Küba"               ? "CU"  :
-  ulke == "Letonya"            ? "LV"  :
-  ulke == "Libya"              ? "LY"  :
-  ulke == "Litvanya"           ? "LT"  :
-  ulke == "Lübnan"             ? "LB"  :
-  ulke == "Lüksemburg"         ? "LU"  :
-  ulke == "Macaristan"         ? "HU"  :
-  ulke == "Madagaskar"         ? "MG"  :
-  ulke == "Makedonya"          ? "MK"  :
-  ulke == "Maldivler"          ? "MV"  :
-  ulke == "Malezya"            ? "MY"  :
-  ulke == "Malta"              ? "MT"  :
-  ulke == "Man Adası"          ? "IM"  :
-  ulke == "Meksika"            ? "MX"  :
-  ulke == "Mısır"              ? "EG"  :
-  ulke == "Moğolistan"         ? "MN"  :
-  ulke == "Moldova"            ? "MD"  :
-  ulke == "Mozambik"           ? "MZ"  :
-  ulke == "Myanmar"            ? "MM"  :
-  ulke == "Nepal"              ? "NP"  :
-  ulke == "Nijerya"            ? "NG"  :
-  ulke == "Nikaragua"          ? "NI"  :
-  ulke == "Norveç"             ? "NO"  :
-  ulke == "Özbekistan"         ? "UZ"  :
-  ulke == "Pakistan"           ? "PK"  :
-  ulke == "Paraguay"           ? "PY"  :
-  ulke == "Peru"               ? "PE"  :
-  ulke == "Polonya"            ? "PL"  :
-  ulke == "Portekiz"           ? "PT"  :
-  ulke == "Porto Riko"         ? "PR"  :
-  ulke == "Romanya"            ? "RO"  :
-  ulke == "Ruanda"             ? "RW"  :
-  ulke == "Rusya"              ? "RU"  :
-  ulke == "Senegal"            ? "SN"  :
-  ulke == "Sırbistan"          ? "RS"  :
-  ulke == "Singapur"           ? "SG"  :
-  ulke == "Slovakya"           ? "SK"  :
-  ulke == "Slovenya"           ? "SI"  :
-  ulke == "Somali"             ? "SO"  :
-  ulke == "Sudan"              ? "SD"  :
-  ulke == "Suriye"             ? "SY"  :
-  ulke == "Suudi Arabistan"    ? "SA"  :
-  ulke == "Şili"               ? "CL"  :
-  ulke == "Tacikistan"         ? "TJ"  :
-  ulke == "Tayland"            ? "TH"  :
-  ulke == "Tayvan"             ? "TW"  :
-  ulke == "Tunus"              ? "TN"  :
-  ulke == "Türkmenistan"       ? "TM"  :
-  ulke == "Uganda"             ? "UG"  :
-  ulke == "Ukrayna"            ? "UA"  :
-  ulke == "Uruguay"            ? "UY"  :
-  ulke == "Ürdün"              ? "JO"  :
-  ulke == "Venezuela"          ? "VE"  :
-  ulke == "Vietnam"            ? "VN"  :
-  ulke == "Yeni Zelanda"       ? "NZ"  :
-  ulke == "Yunanistan"         ? "GR"  :
-  ulke == "Zimbabve"           ? "ZW"  : na
-//
-
-data = input.string(title="     Data  ", defval="Nüfus", inline="i", group=gr_d, options=[
-  "╠════════ GENEL BAŞLIKLAR ═════════╣"                 ,
-  "Nüfus"                                                ,
-  "Gayri Safi Yurtiçi Hasıla (GSYH)"                     ,
-  "Kişi Başına Düşen GSYH"                               ,
-  "Kişi Başına Düşen GSYH (Satın Alma Gücü P.)"          ,
-  "Büyüme Oranı GSYH"                                    ,
-  "Enflasyon Oranı (Aylık)"                              ,
-  "Enflasyon Oranı (Yıllık)"                             ,
-  "Gıda Enflasyonu (Yıllık)"                             ,
-  "Faiz Oranı"                                           ,
-  "Mevduat Faiz Oranı"                                   ,
-  "Merkez Bankası Kredi Faiz Oranı"                      ,
-  "Asgari Ücret"                                         ,
-  "İşsizlik Oranı"                                       ,
-  "İşsiz Sayısı"                                         ,
-  "İş Gücüne Katılım Oranı"                              ,
-  "Uzun Süreli İşsizlik Oranı"                           ,
-  "Genç İşsizlik Oranı"                                  ,
-  "Yolsuzluk Endeksi"                                    ,
-  "Yolsuzluk Sıralaması"                                 ,
-  "Döviz Rezervleri"                                     ,
-  "Altın Rezervleri"                                     ,
-  "Hazine Nakit Bakiyesi"                                ,
-  "Tüketici Fiyat Endeksi (Tüfe)"                        ,
-  "Tüketici Harcamaları"                                 ,
-  "Üretici Fiyat Endeksi (Üfe)"                          ,
-  "Üretici Fiyat Enflasyonu (Aylık)"                     ,
-  "Üretici Fiyatları Endeksi (Yıllık)"                   ,
-  "Cari Hesap"                                           ,
-  "Dış Borç"                                             ,
-  "Dış Ticaret Dengesi"                                  ,
-  "╠════════ GAYRİSAFİ HASILA ═════════╣"                ,
-  "Gayrisafi Sabit Sermaye Oluşumu"                      ,
-  "Tarımdan Gelen GSYH"                                  ,
-  "İnşaattan Gelen GSYH"                                 ,
-  "Üretimden Gelen GSYH"                                 ,
-  "Kamu Yönetiminden Gelen GSYH"                         ,
-  "Hizmetlerden Gelen GSYH"                              ,
-  "Büyüme Oranı GSYH (Yıllık)"                           ,
-  "Sabit Fiyatlarla GSYH"                                ,
-  "Madencilikten Gelen GSYH"                             ,
-  "Ulaştırmadan Gelen GSYH"                              ,
-  "Kamu Hizmetlerinden Gelen GSYH"                       ,
-  "GSYH (Yıllık)"                                        ,
-  "Sabit Fiyatlarla Harcamaya Göre GSYH"                 ,
-  "Gayri Safi Milli Hasıla"                              ,
-  "╠═══════════ SERMAYE ════════════╣"                   ,
-  "Merkez Bankası Bilançosu"                             ,
-  "Nakit Rezerv Oranı"                                   ,
-  "Bankalar Bilançosu"                                   ,
-  "Yabancı Hisse Senedi Yatırımı"                        ,
-  "Para Arzı (M1)"                                       ,
-  "Para Arzı (M2)"                                       ,
-  "Para Arzı (M3)"                                       ,
-  "Özel Sektöre Olan Krediler"                           ,
-  "Bankalar Arası Referans Faiz Oranı"                   ,
-  "Faiz Oranları İndirim Oranı"                          ,
-  "GSYH'ya Özel Sektör Borcu Oranı"                      ,
-  "╠═════════════ FİYAT ═════════════╣"                  ,
-  "İhracat Fiyatları"                                    ,
-  "İthalat Fiyatları"                                    ,
-  "Çekirdek Tüketici Fiyatları"                          ,
-  "GSYH Deflatörü"                                       ,
-  "Çekirdek Enflasyon Oranı (Yıllık)"                    ,
-  "Uyumlaştırılmış Enflasyon Oranı (Aylık)"              ,
-  "Uyumlaştırılmış Tüketici Fiyatları Endeksi"           ,
-  "TÜFE - All Items"                                     ,
-  "TÜFE Konut Hizmetleri"                                ,
-  "TÜFE Ulaştırma"                                       ,
-  "Uyumlulaştırılmış Enflasyon oranı (Yıllık)"           ,
-  "╠════════════ DEVLET ════════════╣"                   ,
-  "Devlet Borcu / GSYH Oranı"                            ,
-  "Devlet Bütçesi"                                       ,
-  "Devlet Bütçe Değeri"                                  ,
-  "Devlet Gelirleri"                                     ,
-  "Devlet Harcamaları"                                   ,
-  "Devlet Borcu"                                         ,
-  "Maliye Harcamaları"                                   ,
-  "Milli Savunma Harcamaları"                            ,
-  "Sığınma (Mülteci) Başvuruları "                       ,
-  "╠═══════════ TİCARET ════════════╣"                   ,
-  "İhracat Hacmi"                                        ,
-  "İthalat Hacmi"                                        ,
-  "Dış Ticaret Hadleri"                                  ,
-  "Doğal Gaz İthalatı"                                   ,
-  "Rusya'Dan Ham Petrol İthalatı"                        ,
-  "Rusya'Dan Doğal Gaz İthalatı"                         ,
-  "GSYH'Nın Yüzdesi Olarak Cari İşlemler Dengesi"        ,
-  "Uluslararası Sermaye Akışı"                           ,
-  "Yabancı Yatırım (Doğrudan)"                           ,
-  "Para Transferleri"                                    ,
-  "Ham Petrol Üretimi"                                   ,
-  "Turizm Gelirleri"                                     ,
-  "Turist Sayısı"                                        ,
-  "Silah Satışı"                                         ,
-  "Terör Endeksi"                                        ,
-  "╠═══════════ ÜRETİM ═════════════╣"                   ,
-  "Reel Sektör Güven Endeksi"                            ,
-  "Kapasite Kullanım Oranı"                              ,
-  "İş Yapma Kolaylığı Sıralaması"                        ,
-  "Stoklardaki Değişiklikler"                            ,
-  "Öncü Ekonomik Gösterge"                               ,
-  "Elektrik Üretimi"                                     ,
-  "Madencilik Üretimi (Yıllık)"                          ,
-  "Çelik Üretimi"                                        ,
-  "Sanayi Üretimi (Aylık)"                               ,
-  "Sanayi Üretimi (Yıllık)"                              ,
-  "İmalat Üretimi (Yıllık)"                              ,
-  "İflas Sayısı"                                         ,
-  "Otomobil Üretimi"                                     ,
-  "Toplam Araç Satışı"                                   ,
-  "Araç Ruhsat Sayısı"                                   ,
-  "Satın Alma Yöneticileri Endeksi"                      ,
-  "╠════════ ÇALIŞMA EKONOMİSİ ═════════╣"               ,
-  "İstihdam Sayısı (Çalışan Sayısı)"                     ,
-  "Tam Zamanlı Çalışan Sayısı"                           ,
-  "Yarı-Zamanlı Çalışan Sayısı"                          ,
-  "İstihdam Oranı (Çalışan Oranı)"                       ,
-  "Emeklilik Yaşı Erkekler"                              ,
-  "Emeklilik Yaşındaki Kadınlar"                         ,
-  "İmalat Ücretleri"                                     ,
-  "İşçi Maliyetleri"                                     ,
-  "Ücretler"                                             ,
-  "Yaşama Maliyeti (Aile)"                               ,
-  "Yaşama Maliyeti (Tek Kişi)"                           ,
-  "╠═══════════ TÜKETİCİ ════════════╣"                  ,
-  "Tüketici Güven Endeksi"                               ,
-  "Tüketici Kredisi Hacmi"                               ,
-  "Ekonomik İyimserlik Endeksi"                          ,
-  "Özel Sektör Kredisi"                                  ,
-  "Perakende Satışlar (Aylık)"                           ,
-  "Perakende Satışlar (Yıllık)"                          ,
-  "Hanehalkı Borçlarının Gsyh'Ye Oranı"                  ,
-  "Benzin Fiyatları"                                     ,
-  "╠════════════ VERGİ ═════════════╣"                   ,
-  "Kişisel Gelir Vergisi Oranı"                          ,
-  "Kurumlar Vergisi Oranı"                               ,
-  "Satış Vergisi Oranı"                                  ,
-  "Sosyal Güvenlik Oranı"                                ,
-  "Şirketler İçin Sosyal Güvenlik Oranı"                 ,
-  "Çalışanlar İçin Sosyal Güvenlik Oranı"                ,
-  "╠═══════════ BARINMA ════════════╣"                   ,
-  "Ev Sahipliği Oranı"                                   ,
-  "Ev Fiyat Endeksi"                                     ,
-  "Yeni Konut Satışı"                                    ,
-  "İkinci El Konut Satışı"                               ,
-  "İnşaat Ruhsat Sayısı"                                 ,
-  "İnşaat Üretimi (Yıllık)"                              ,
-  "Başlamış İnşaat Sayısı"                               ,
-  "Fiyat Kira Oranı"                                     ,
-  "╠════════════ SAĞLIK ════════════╣"                   ,
-  "Doktor Sayısı"                                        ,
-  "Hemşire Sayısı"                                       ,
-  "Hastaneler"                                           ,
-  "Hastane Yatakları"                                    ,
-  "Yoğun Bakım Yatakları"                                
+data = input.string(title="     Data  ", defval="1. Nüfus [POP]", inline="i", group=gr_d, options=[
+  "╠════════ GENEL BAŞLIKLAR ═════════╣"                                                    ,
+  "1. "   + "Nüfus"                                         + " ["+ "POP"             + "]" ,
+  "2. "   + "Gayri Safi Yurtiçi Hasıla (GSYH)"              + " ["+ "GDP"             + "]" ,
+  "3. "   + "Kişi Başına Düşen GSYH"                        + " ["+ "GDPPC"           + "]" ,
+  "4. "   + "Kişi Başına Düşen GSYH (Satın Alma Gücü P.)"   + " ["+ "GDPPCP"          + "]" ,
+  "5. "   + "Büyüme Oranı GSYH"                             + " ["+ "GDPQQ"           + "]" ,
+  "6. "   + "Enflasyon Oranı (Aylık)"                       + " ["+ "IRMM"            + "]" ,
+  "7. "   + "Enflasyon Oranı (Yıllık)"                      + " ["+ "IRYY"            + "]" ,
+  "8. "   + "Gıda Enflasyonu (Yıllık)"                      + " ["+ "FI"              + "]" ,
+  "9. "   + "Faiz Oranı"                                    + " ["+ "INTR"            + "]" ,
+  "10. "  + "Mevduat Faiz Oranı"                            + " ["+ "DIR"             + "]" ,
+  "11. "  + "Merkez Bankası Kredi Faiz Oranı"               + " ["+ "LR"              + "]" ,
+  "12. "  + "Asgari Ücret"                                  + " ["+ "MW"              + "]" ,
+  "13. "  + "İşsizlik Oranı"                                + " ["+ "UR"              + "]" ,
+  "14. "  + "İşsiz Sayısı"                                  + " ["+ "UP"              + "]" ,
+  "15. "  + "İş Gücüne Katılım Oranı"                       + " ["+ "LFPR"            + "]" ,
+  "16. "  + "Uzun Süreli İşsizlik Oranı"                    + " ["+ "LTUR"            + "]" ,
+  "17. "  + "Genç İşsizlik Oranı"                           + " ["+ "YUR"             + "]" ,
+  "18. "  + "Yolsuzluk Endeksi"                             + " ["+ "CORPI"           + "]" ,
+  "19. "  + "Yolsuzluk Sıralaması"                          + " ["+ "CORR"            + "]" ,
+  "20. "  + "Döviz Rezervleri"                              + " ["+ "FER"             + "]" ,
+  "21. "  + "Altın Rezervleri"                              + " ["+ "GRES"            + "]" ,
+  "22. "  + "Hazine Nakit Bakiyesi"                         + " ["+ "TCB"             + "]" ,
+  "23. "  + "Tüketici Fiyat Endeksi (Tüfe)"                 + " ["+ "CPI"             + "]" ,
+  "24. "  + "Tüketici Harcamaları"                          + " ["+ "CS"              + "]" ,
+  "25. "  + "Üretici Fiyat Endeksi (Üfe)"                   + " ["+ "PPI"             + "]" ,
+  "26. "  + "Üretici Fiyat Enflasyonu (Aylık)"              + " ["+ "PPIMM"           + "]" ,
+  "27. "  + "Üretici Fiyatları Endeksi (Yıllık)"            + " ["+ "PPIYY"           + "]" ,
+  "28. "  + "Cari Hesap"                                    + " ["+ "CA"              + "]" ,
+  "29. "  + "Dış Borç"                                      + " ["+ "ED"              + "]" ,
+  "30. "  + "Dış Ticaret Dengesi"                           + " ["+ "BOT"             + "]" ,
+  "╠════════ GAYRİSAFİ HASILA ═════════╣"                                                   ,
+  "31. "  + "Gayrisafi Sabit Sermaye Oluşumu"               + " ["+ "GFCF"            + "]" ,
+  "32. "  + "Tarımdan Gelen GSYH"                           + " ["+ "GDPA"            + "]" ,
+  "33. "  + "İnşaattan Gelen GSYH"                          + " ["+ "GDPC"            + "]" ,
+  "34. "  + "Üretimden Gelen GSYH"                          + " ["+ "GDPMAN"          + "]" ,
+  "35. "  + "Kamu Yönetiminden Gelen GSYH"                  + " ["+ "GDPPA"           + "]" ,
+  "36. "  + "Hizmetlerden Gelen GSYH"                       + " ["+ "GDPS"            + "]" ,
+  "37. "  + "Büyüme Oranı GSYH (Yıllık)"                    + " ["+ "FYGDPG"          + "]" ,
+  "38. "  + "Sabit Fiyatlarla GSYH"                         + " ["+ "GDPCP"           + "]" ,
+  "39. "  + "Madencilikten Gelen GSYH"                      + " ["+ "GDPMIN"          + "]" ,
+  "40. "  + "Ulaştırmadan Gelen GSYH"                       + " ["+ "GDPT"            + "]" ,
+  "41. "  + "Kamu Hizmetlerinden Gelen GSYH"                + " ["+ "GDPU"            + "]" ,
+  "42. "  + "GSYH (Yıllık)"                                 + " ["+ "GDPYY"           + "]" ,
+  "43. "  + "Sabit Fiyatlarla Harcamaya Göre GSYH"          + " ["+ "NAEXKP01TRQ652S" + "]" ,
+  "44. "  + "Gayri Safi Milli Hasıla"                       + " ["+ "GNP"             + "]" ,
+  "╠═══════════ SERMAYE ════════════╣"                                                      ,
+  "45. "  + "Merkez Bankası Bilançosu"                      + " ["+ "CBBS"            + "]" ,
+  "46. "  + "Nakit Rezerv Oranı"                            + " ["+ "CRR"             + "]" ,
+  "47. "  + "Bankalar Bilançosu"                            + " ["+ "BBS"             + "]" ,
+  "48. "  + "Yabancı Hisse Senedi Yatırımı"                 + " ["+ "FSI"             + "]" ,
+  "49. "  + "Para Arzı (M1)"                                + " ["+ "M1"              + "]" ,
+  "50. "  + "Para Arzı (M2)"                                + " ["+ "M2"              + "]" ,
+  "51. "  + "Para Arzı (M3)"                                + " ["+ "M3"              + "]" ,
+  "52. "  + "Özel Sektöre Olan Krediler"                    + " ["+ "LPS"             + "]" ,
+  "53. "  + "Bankalar Arası Referans Faiz Oranı"            + " ["+ "INBR"            + "]" ,
+  "54. "  + "Faiz Oranları İndirim Oranı"                   + " ["+ "INTDSRTRM193N"   + "]" ,
+  "55. "  + "GSYH'ya Özel Sektör Borcu Oranı"               + " ["+ "PDG"             + "]" ,
+  "╠═════════════ FİYAT ═════════════╣"                                                     ,
+  "56. "  + "İhracat Fiyatları"                             + " ["+ "EP"              + "]" ,
+  "57. "  + "İthalat Fiyatları"                             + " ["+ "IPRI"            + "]" ,
+  "58. "  + "Çekirdek Tüketici Fiyatları"                   + " ["+ "CCP"             + "]" ,
+  "59. "  + "GSYH Deflatörü"                                + " ["+ "GDPD"            + "]" ,
+  "60. "  + "Çekirdek Enflasyon Oranı (Yıllık)"             + " ["+ "CIR"             + "]" ,
+  "61. "  + "Uyumlaştırılmış Enflasyon Oranı (Aylık)"       + " ["+ "HIRMM"           + "]" ,
+  "62. "  + "Uyumlaştırılmış Tüketici Fiyatları Endeksi"    + " ["+ "HICP"            + "]" ,
+  "63. "  + "TÜFE - All Items"                              + " ["+ "TURCPIALLMINMEI" + "]" ,
+  "64. "  + "TÜFE Konut Hizmetleri"                         + " ["+ "CPIHU"           + "]" ,
+  "65. "  + "TÜFE Ulaştırma"                                + " ["+ "CPIT"            + "]" ,
+  "66. "  + "Uyumlulaştırılmış Enflasyon oranı (Yıllık)"    + " ["+ "HIRYY"           + "]" ,
+  "╠════════════ DEVLET ════════════╣"                                                      ,
+  "67. "  + "Devlet Borcu / GSYH Oranı"                     + " ["+ "GDG"             + "]" ,
+  "68. "  + "Devlet Bütçesi"                                + " ["+ "GBP"             + "]" ,
+  "69. "  + "Devlet Bütçe Değeri"                           + " ["+ "GBV"             + "]" ,
+  "70. "  + "Devlet Gelirleri"                              + " ["+ "GR"              + "]" ,
+  "71. "  + "Devlet Harcamaları"                            + " ["+ "GSP"             + "]" ,
+  "72. "  + "Devlet Borcu"                                  + " ["+ "GD"              + "]" ,
+  "73. "  + "Maliye Harcamaları"                            + " ["+ "FE"              + "]" ,
+  "74. "  + "Milli Savunma Harcamaları"                     + " ["+ "ME"              + "]" ,
+  "75. "  + "Sığınma (Mülteci) Başvuruları "                + " ["+ "AA"              + "]" ,
+  "╠═══════════ TİCARET ════════════╣"                                                      ,
+  "76. "  + "İhracat Hacmi"                                 + " ["+ "EXP"             + "]" ,
+  "77. "  + "İthalat Hacmi"                                 + " ["+ "IMP"             + "]" ,
+  "78. "  + "Dış Ticaret Hadleri"                           + " ["+ "TOT"             + "]" ,
+  "79. "  + "Doğal Gaz İthalatı"                            + " ["+ "NGI"             + "]" ,
+  "80. "  + "Rusya'Dan Ham Petrol İthalatı"                 + " ["+ "COIR"            + "]" ,
+  "81. "  + "Rusya'Dan Doğal Gaz İthalatı"                  + " ["+ "NGIR"            + "]" ,
+  "82. "  + "GSYH'Nın Yüzdesi Olarak Cari İşlemler Dengesi" + " ["+ "CAG"             + "]" ,
+  "83. "  + "Uluslararası Sermaye Akışı"                    + " ["+ "CF"              + "]" ,
+  "84. "  + "Yabancı Yatırım (Doğrudan)"                    + " ["+ "FDI"             + "]" ,
+  "85. "  + "Para Transferleri"                             + " ["+ "REM"             + "]" ,
+  "86. "  + "Ham Petrol Üretimi"                            + " ["+ "COP"             + "]" ,
+  "87. "  + "Turizm Gelirleri"                              + " ["+ "TR"              + "]" ,
+  "88. "  + "Turist Sayısı"                                 + " ["+ "TA"              + "]" ,
+  "89. "  + "Silah Satışı"                                  + " ["+ "WES"             + "]" ,
+  "90. "  + "Terör Endeksi"                                 + " ["+ "TI"              + "]" ,
+  "╠═══════════ ÜRETİM ═════════════╣"                                                      ,
+  "91. "  + "Reel Sektör Güven Endeksi"                     + " ["+ "BCOI"            + "]" ,
+  "92. "  + "Kapasite Kullanım Oranı"                       + " ["+ "CU"              + "]" ,
+  "93. "  + "İş Yapma Kolaylığı Sıralaması"                 + " ["+ "EDBR"            + "]" ,
+  "94. "  + "Stoklardaki Değişiklikler"                     + " ["+ "IC"              + "]" ,
+  "95. "  + "Öncü Ekonomik Gösterge"                        + " ["+ "LEI"             + "]" ,
+  "96. "  + "Elektrik Üretimi"                              + " ["+ "ELP"             + "]" ,
+  "97. "  + "Madencilik Üretimi (Yıllık)"                   + " ["+ "MIP"             + "]" ,
+  "98. "  + "Çelik Üretimi"                                 + " ["+ "SP"              + "]" ,
+  "99. "  + "Sanayi Üretimi (Aylık)"                        + " ["+ "IPMM"            + "]" ,
+  "100. " + "Sanayi Üretimi (Yıllık)"                       + " ["+ "IPYY"            + "]" ,
+  "101. " + "İmalat Üretimi (Yıllık)"                       + " ["+ "MPRYY"           + "]" ,
+  "102. " + "İflas Sayısı"                                  + " ["+ "BR"              + "]" ,
+  "103. " + "Otomobil Üretimi"                              + " ["+ "CAP"             + "]" ,
+  "104. " + "Toplam Araç Satışı"                            + " ["+ "TVS"             + "]" ,
+  "105. " + "Araç Ruhsat Sayısı"                            + " ["+ "CAR"             + "]" ,
+  "106. " + "Satın Alma Yöneticileri Endeksi"               + " ["+ "MPMI"            + "]" ,
+  "╠════════ ÇALIŞMA EKONOMİSİ ═════════╣"                                                  ,
+  "107. " + "İstihdam Sayısı (Çalışan Sayısı)"              + " ["+ "EMP"             + "]" ,
+  "108. " + "Tam Zamanlı Çalışan Sayısı"                    + " ["+ "FTE"             + "]" ,
+  "109. " + "Yarı-Zamanlı Çalışan Sayısı"                   + " ["+ "PTE"             + "]" ,
+  "110. " + "İstihdam Oranı (Çalışan Oranı)"                + " ["+ "EMR"             + "]" ,
+  "111. " + "Emeklilik Yaşı Erkekler"                       + " ["+ "RAM"             + "]" ,
+  "112. " + "Emeklilik Yaşındaki Kadınlar"                  + " ["+ "RAW"             + "]" ,
+  "113. " + "İmalat Ücretleri"                              + " ["+ "WM"              + "]" ,
+  "114. " + "İşçi Maliyetleri"                              + " ["+ "LC"              + "]" ,
+  "115. " + "Ücretler"                                      + " ["+ "WAG"             + "]" ,
+  "116. " + "Yaşama Maliyeti (Aile)"                        + " ["+ "LWF"             + "]" ,
+  "117. " + "Yaşama Maliyeti (Tek Kişi)"                    + " ["+ "LWI"             + "]" ,
+  "╠═══════════ TÜKETİCİ ════════════╣"                                                     ,
+  "118. " + "Tüketici Güven Endeksi"                        + " ["+ "CCI"             + "]" ,
+  "119. " + "Tüketici Kredisi Hacmi"                        + " ["+ "CCR"             + "]" ,
+  "120. " + "Ekonomik İyimserlik Endeksi"                   + " ["+ "EOI"             + "]" ,
+  "121. " + "Özel Sektör Kredisi"                           + " ["+ "PSC"             + "]" ,
+  "122. " + "Perakende Satışlar (Aylık)"                    + " ["+ "RSMM"            + "]" ,
+  "123. " + "Perakende Satışlar (Yıllık)"                   + " ["+ "RSYY"            + "]" ,
+  "124. " + "Hanehalkı Borçlarının Gsyh'Ye Oranı"           + " ["+ "HDG"             + "]" ,
+  "125. " + "Benzin Fiyatları"                              + " ["+ "GASP"            + "]" ,
+  "╠════════════ VERGİ ═════════════╣"                                                      ,
+  "126. " + "Kişisel Gelir Vergisi Oranı"                   + " ["+ "PITR"            + "]" ,
+  "127. " + "Kurumlar Vergisi Oranı"                        + " ["+ "CTR"             + "]" ,
+  "128. " + "Satış Vergisi Oranı"                           + " ["+ "STR"             + "]" ,
+  "129. " + "Sosyal Güvenlik Oranı"                         + " ["+ "SSR"             + "]" ,
+  "130. " + "Şirketler İçin Sosyal Güvenlik Oranı"          + " ["+ "SSRC"            + "]" ,
+  "131. " + "Çalışanlar İçin Sosyal Güvenlik Oranı"         + " ["+ "SSRE"            + "]" ,
+  "╠═══════════ BARINMA ════════════╣"                                                      ,
+  "132. " + "Ev Sahipliği Oranı"                            + " ["+ "HOR"             + "]" ,
+  "133. " + "Ev Fiyat Endeksi"                              + " ["+ "HPI"             + "]" ,
+  "134. " + "Yeni Konut Satışı"                             + " ["+ "NHS"             + "]" ,
+  "135. " + "İkinci El Konut Satışı"                        + " ["+ "EHS"             + "]" ,
+  "136. " + "İnşaat Ruhsat Sayısı"                          + " ["+ "BP"              + "]" ,
+  "137. " + "İnşaat Üretimi (Yıllık)"                       + " ["+ "COUT"            + "]" ,
+  "138. " + "Başlamış İnşaat Sayısı"                        + " ["+ "HST"             + "]" ,
+  "139. " + "Fiyat Kira Oranı"                              + " ["+ "PRR"             + "]" ,
+  "╠════════════ SAĞLIK ════════════╣"                                                      ,
+  "140. " + "Doktor Sayısı"                                 + " ["+ "MD"              + "]" ,
+  "141. " + "Hemşire Sayısı"                                + " ["+ "NURS"            + "]" ,
+  "142. " + "Hastaneler"                                    + " ["+ "HOSP"            + "]" ,
+  "143. " + "Hastane Yatakları"                             + " ["+ "HB"              + "]" ,
+  "144. " + "Yoğun Bakım Yatakları"                         + " ["+ "ICUB"            + "]"  
   ])
 //
 
-data_sym = 
-  data == "Nüfus"                                                ? "POP"               :
-  data == "Gayri Safi Yurtiçi Hasıla (GSYH)"                     ? "GDP"               :
-  data == "Kişi Başına Düşen GSYH"                               ? "GDPPC"             :
-  data == "Kişi Başına Düşen GSYH (Satın Alma Gücü P.)"          ? "GDPPCP"            :
-  data == "Büyüme Oranı GSYH"                                    ? "GDPQQ"             :
-  data == "Enflasyon Oranı (Aylık)"                              ? "IRMM"              :
-  data == "Enflasyon Oranı (Yıllık)"                             ? "IRYY"              :
-  data == "Gıda Enflasyonu (Yıllık)"                             ? "FI"                :
-  data == "Faiz Oranı"                                           ? "INTR"              :
-  data == "Mevduat Faiz Oranı"                                   ? "DIR"               :
-  data == "Merkez Bankası Kredi Faiz Oranı"                      ? "LR"                :
-  data == "Asgari Ücret"                                         ? "MW"                :
-  data == "İşsizlik Oranı"                                       ? "UR"                :
-  data == "İşsiz Sayısı"                                         ? "UP"                :
-  data == "İş Gücüne Katılım Oranı"                              ? "LFPR"              :
-  data == "Uzun Süreli İşsizlik Oranı"                           ? "LTUR"              :
-  data == "Genç İşsizlik Oranı"                                  ? "YUR"               :
-  data == "Yolsuzluk Endeksi"                                    ? "CORPI"             :
-  data == "Yolsuzluk Sıralaması"                                 ? "CORR"              :
-  data == "Döviz Rezervleri"                                     ? "FER"               :
-  data == "Altın Rezervleri"                                     ? "GRES"              :
-  data == "Hazine Nakit Bakiyesi"                                ? "TCB"               :
-  data == "Tüketici Fiyat Endeksi (Tüfe)"                        ? "CPI"               :
-  data == "Tüketici Harcamaları"                                 ? "CS"                :
-  data == "Üretici Fiyat Endeksi (Üfe)"                          ? "PPI"               :
-  data == "Üretici Fiyat Enflasyonu (Aylık)"                     ? "PPIMM"             :
-  data == "Üretici Fiyatları Endeksi (Yıllık)"                   ? "PPIYY"             :
-  data == "Cari Hesap"                                           ? "CA"                :
-  data == "Dış Borç"                                             ? "ED"                :
-  data == "Dış Ticaret Dengesi"                                  ? "BOT"               :
-  data == "Gayrisafi Sabit Sermaye Oluşumu"                      ? "GFCF"              :
-  data == "Tarımdan Gelen GSYH"                                  ? "GDPA"              :
-  data == "İnşaattan Gelen GSYH"                                 ? "GDPC"              :
-  data == "Üretimden Gelen GSYH"                                 ? "GDPMAN"            :
-  data == "Kamu Yönetiminden Gelen GSYH"                         ? "GDPPA"             :
-  data == "Hizmetlerden Gelen GSYH"                              ? "GDPS"              :
-  data == "Büyüme Oranı GSYH (Yıllık)"                           ? "FYGDPG"            :
-  data == "Sabit Fiyatlarla GSYH"                                ? "GDPCP"             :
-  data == "Madencilikten Gelen GSYH"                             ? "GDPMIN"            :
-  data == "Ulaştırmadan Gelen GSYH"                              ? "GDPT"              :
-  data == "Kamu Hizmetlerinden Gelen GSYH"                       ? "GDPU"              :
-  data == "GSYH (Yıllık)"                                        ? "GDPYY"             :
-  data == "Sabit Fiyatlarla Harcamaya Göre GSYH"                 ? "NAEXKP01TRQ652S"   :
-  data == "Gayri Safi Milli Hasıla"                              ? "GNP"               :
-  data == "Merkez Bankası Bilançosu"                             ? "CBBS"              :
-  data == "Nakit Rezerv Oranı"                                   ? "CRR"               :
-  data == "Bankalar Bilançosu"                                   ? "BBS"               :
-  data == "Yabancı Hisse Senedi Yatırımı"                        ? "FSI"               :
-  data == "Para Arzı (M1)"                                       ? "M1"                :
-  data == "Para Arzı (M2)"                                       ? "M2"                :
-  data == "Para Arzı (M3)"                                       ? "M3"                :
-  data == "Özel Sektöre Olan Krediler"                           ? "LPS"               :
-  data == "Bankalar Arası Referans Faiz Oranı"                   ? "INBR"              :
-  data == "Faiz Oranları İndirim Oranı"                          ? "INTDSRTRM193N"     :
-  data == "GSYH'ya Özel Sektör Borcu Oranı"                      ? "PDG"               :
-  data == "İhracat Fiyatları"                                    ? "EP"                :
-  data == "İthalat Fiyatları"                                    ? "IPRI"              :
-  data == "Çekirdek Tüketici Fiyatları"                          ? "CCP"               :
-  data == "GSYH Deflatörü"                                       ? "GDPD"              :
-  data == "Çekirdek Enflasyon Oranı (Yıllık)"                    ? "CIR"               :
-  data == "Uyumlaştırılmış Enflasyon Oranı (Aylık)"              ? "HIRMM"             :
-  data == "Uyumlaştırılmış Tüketici Fiyatları Endeksi"           ? "HICP"              :
-  data == "TÜFE - All Items"                                     ? "TURCPIALLMINMEI"   :
-  data == "TÜFE Konut Hizmetleri"                                ? "CPIHU"             :
-  data == "TÜFE Ulaştırma"                                       ? "CPIT"              :
-  data == "Uyumlulaştırılmış Enflasyon oranı (Yıllık)"           ? "HIRYY"             :
-  data == "Devlet Borcu / GSYH Oranı"                            ? "GDG"               :
-  data == "Devlet Bütçesi"                                       ? "GBP"               :
-  data == "Devlet Bütçe Değeri"                                  ? "GBV"               :
-  data == "Devlet Gelirleri"                                     ? "GR"                :
-  data == "Devlet Harcamaları"                                   ? "GSP"               :
-  data == "Devlet Borcu"                                         ? "GD"                :
-  data == "Maliye Harcamaları"                                   ? "FE"                :
-  data == "Milli Savunma Harcamaları"                            ? "ME"                :
-  data == "Sığınma (Mülteci) Başvuruları "                       ? "AA"                :
-  data == "İhracat Hacmi"                                        ? "EXP"               :
-  data == "İthalat Hacmi"                                        ? "IMP"               :
-  data == "Dış Ticaret Hadleri"                                  ? "TOT"               :
-  data == "Doğal Gaz İthalatı"                                   ? "NGI"               :
-  data == "Rusya'Dan Ham Petrol İthalatı"                        ? "COIR"              :
-  data == "Rusya'Dan Doğal Gaz İthalatı"                         ? "NGIR"              :
-  data == "GSYH'Nın Yüzdesi Olarak Cari İşlemler Dengesi"        ? "CAG"               :
-  data == "Uluslararası Sermaye Akışı"                           ? "CF"                :
-  data == "Yabancı Yatırım (Doğrudan)"                           ? "FDI"               :
-  data == "Para Transferleri"                                    ? "REM"               :
-  data == "Ham Petrol Üretimi"                                   ? "COP"               :
-  data == "Turizm Gelirleri"                                     ? "TR"                :
-  data == "Turist Sayısı"                                        ? "TA"                :
-  data == "Silah Satışı"                                         ? "WES"               :
-  data == "Terör Endeksi"                                        ? "TI"                :
-  data == "Reel Sektör Güven Endeksi"                            ? "BCOI"              :
-  data == "Kapasite Kullanım Oranı"                              ? "CU"                :
-  data == "İş Yapma Kolaylığı Sıralaması"                        ? "EDBR"              :
-  data == "Stoklardaki Değişiklikler"                            ? "IC"                :
-  data == "Öncü Ekonomik Gösterge"                               ? "LEI"               :
-  data == "Elektrik Üretimi"                                     ? "ELP"               :
-  data == "Madencilik Üretimi (Yıllık)"                          ? "MIP"               :
-  data == "Çelik Üretimi"                                        ? "SP"                :
-  data == "Sanayi Üretimi (Aylık)"                               ? "IPMM"              :
-  data == "Sanayi Üretimi (Yıllık)"                              ? "IPYY"              :
-  data == "İmalat Üretimi (Yıllık)"                              ? "MPRYY"             :
-  data == "İflas Sayısı"                                         ? "BR"                :
-  data == "Otomobil Üretimi"                                     ? "CAP"               :
-  data == "Toplam Araç Satışı"                                   ? "TVS"               :
-  data == "Araç Ruhsat Sayısı"                                   ? "CAR"               :
-  data == "Satın Alma Yöneticileri Endeksi"                      ? "MPMI"              :
-  data == "İstihdam Sayısı (Çalışan Sayısı)"                     ? "EMP"               :
-  data == "Tam Zamanlı Çalışan Sayısı"                           ? "FTE"               :
-  data == "Yarı-Zamanlı Çalışan Sayısı"                          ? "PTE"               :
-  data == "İstihdam Oranı (Çalışan Oranı)"                       ? "EMR"               :
-  data == "Emeklilik Yaşı Erkekler"                              ? "RAM"               :
-  data == "Emeklilik Yaşındaki Kadınlar"                         ? "RAW"               :
-  data == "İmalat Ücretleri"                                     ? "WM"                :
-  data == "İşçi Maliyetleri"                                     ? "LC"                :
-  data == "Ücretler"                                             ? "WAG"               :
-  data == "Yaşama Maliyeti (Aile)"                               ? "LWF"               :
-  data == "Yaşama Maliyeti (Tek Kişi)"                           ? "LWI"               :
-  data == "Tüketici Güven Endeksi"                               ? "CCI"               :
-  data == "Tüketici Kredisi Hacmi"                               ? "CCR"               :
-  data == "Ekonomik İyimserlik Endeksi"                          ? "EOI"               :
-  data == "Özel Sektör Kredisi"                                  ? "PSC"               :
-  data == "Perakende Satışlar (Aylık)"                           ? "RSMM"              :
-  data == "Perakende Satışlar (Yıllık)"                          ? "RSYY"              :
-  data == "Hanehalkı Borçlarının Gsyh'Ye Oranı"                  ? "HDG"               :
-  data == "Benzin Fiyatları"                                     ? "GASP"              :
-  data == "Kişisel Gelir Vergisi Oranı"                          ? "PITR"              :
-  data == "Kurumlar Vergisi Oranı"                               ? "CTR"               :
-  data == "Satış Vergisi Oranı"                                  ? "STR"               :
-  data == "Sosyal Güvenlik Oranı"                                ? "SSR"               :
-  data == "Şirketler İçin Sosyal Güvenlik Oranı"                 ? "SSRC"              :
-  data == "Çalışanlar İçin Sosyal Güvenlik Oranı"                ? "SSRE"              :
-  data == "Ev Sahipliği Oranı"                                   ? "HOR"               :
-  data == "Ev Fiyat Endeksi"                                     ? "HPI"               :
-  data == "Yeni Konut Satışı"                                    ? "NHS"               :
-  data == "İkinci El Konut Satışı"                               ? "EHS"               :
-  data == "İnşaat Ruhsat Sayısı"                                 ? "BP"                :
-  data == "İnşaat Üretimi (Yıllık)"                              ? "COUT"              :
-  data == "Başlamış İnşaat Sayısı"                               ? "HST"               :
-  data == "Fiyat Kira Oranı"                                     ? "PRR"               :
-  data == "Doktor Sayısı"                                        ? "MD"                :
-  data == "Hemşire Sayısı"                                       ? "NURS"              :
-  data == "Hastaneler"                                           ? "HOSP"              :
-  data == "Hastane Yatakları"                                    ? "HB"                :
-  data == "Yoğun Bakım Yatakları"                                ? "ICUB"              : 
-  na
+string gr_k  = "KONFİGÜRASYON"
+string gr_bb = "BOLLINGER BAND"
+para_birimi  = input.string(title="Para Birimi", options=["USD", "EUR", "TRY"], defval="USD", group=gr_k)
+hassasiyet   = input.int(title="Hassasiyet", defval=2, group=gr_k)
+renk_data    = input.color(title="Renk     ", defval=#2962ff, group=gr_k, inline="r")
+renk_baslik  = input.color(title="", defval=#686868, group=gr_k, inline="r")
+tablo_sh     = input.bool(title="Bilgi Paneli", defval=true, group=gr_k)
+uyari_sh     = input.bool(title="Uyarı", defval=false, group=gr_k)
+bb_g         = input.bool(title="", defval=false, group=gr_bb, inline="bb")
+bb_u         = input.int(title="", defval=20, group=gr_bb, inline="bb")
+bb_k         = input.float(title="", defval=2.0, group=gr_bb, inline="bb")
+
+// FUNCTIONS
+f_get(x, y, z) =>
+    a = str.pos(x, y) + str.length(y)
+    b = str.pos(x, z)
+    r = str.substring(x, a, b)
 //
 
-kaynak_kurum = 
-  data_sym == "POP"               ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "GDP"               ? "WB - Dünya Bankası"                                            :
-  data_sym == "GDPPC"             ? "WB - Dünya Bankası"                                            :
-  data_sym == "GDPPCP"            ? "WB - Dünya Bankası"                                            :
-  data_sym == "GDPQQ"             ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "IRMM"              ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "IRYY"              ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "FI"                ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "INTR"              ? "T.C. Merkez Bankası"                                           :
-  data_sym == "DIR"               ? "T.C. Merkez Bankası"                                           :
-  data_sym == "LR"                ? "T.C. Merkez Bankası"                                           :
-  data_sym == "MW"                ? "T.C. Çalışma ve Sosyal Güvenlik Bakanlığı"                     :
-  data_sym == "UR"                ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "UP"                ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "LFPR"              ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "LTUR"              ? "EUROSTAT - Avrupa İstatistik Ofisi"                            :
-  data_sym == "YUR"               ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "CORPI"             ? "TI - Uluslararası Şeffaflık Örgütü"                            :
-  data_sym == "CORR"              ? "TI - Uluslararası Şeffaflık Örgütü"                            :
-  data_sym == "FER"               ? "T.C. Merkez Bankası"                                           :
-  data_sym == "GRES"              ? "WGC - Dünya Altın Konseyi"                                     :
-  data_sym == "TCB"               ? "Hazine Müsteşarlığı"                                           :
-  data_sym == "CPI"               ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "CS"                ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "PPI"               ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "PPIMM"             ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "PPIYY"             ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "CA"                ? "T.C. Merkez Bankası"                                           :
-  data_sym == "ED"                ? "Hazine Müsteşarlığı"                                           :
-  data_sym == "BOT"               ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "GFCF"              ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "GDPA"              ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "GDPC"              ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "GDPMAN"            ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "GDPPA"             ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "GDPS"              ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "FYGDPG"            ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "GDPCP"             ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "GDPMIN"            ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "GDPT"              ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "GDPU"              ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "GDPYY"             ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "NAEXKP01TRQ652S"   ? "OECD - Ekonomik Kalkınma ve İşbirliği Örgütü"                  :
-  data_sym == "GNP"               ? "T.C. Merkez Bankası"                                           :
-  data_sym == "CBBS"              ? "T.C. Merkez Bankası"                                           :
-  data_sym == "CRR"               ? "T.C. Merkez Bankası"                                           :
-  data_sym == "BBS"               ? "T.C. Merkez Bankası"                                           :
-  data_sym == "FSI"               ? "T.C. Merkez Bankası"                                           :
-  data_sym == "M1"                ? "T.C. Merkez Bankası"                                           :
-  data_sym == "M2"                ? "T.C. Merkez Bankası"                                           :
-  data_sym == "M3"                ? "T.C. Merkez Bankası"                                           :
-  data_sym == "LPS"               ? "T.C. Merkez Bankası"                                           :
-  data_sym == "INBR"              ? "Banks Association"                                             :
-  data_sym == "INTDSRTRM193N"     ? "IMF - Uluslararası Para Fonu"                                  :
-  data_sym == "PDG"               ? "OECD - Ekonomik Kalkınma ve İşbirliği Örgütü"                  :
-  data_sym == "EP"                ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "IPRI"              ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "CCP"               ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "GDPD"              ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "CIR"               ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "HIRMM"             ? "EUROSTAT - Avrupa İstatistik Ofisi"                            :
-  data_sym == "HICP"              ? "EUROSTAT - Avrupa İstatistik Ofisi"                            :
-  data_sym == "TURCPIALLMINMEI"   ? "OECD - Ekonomik Kalkınma ve İşbirliği Örgütü"                  :
-  data_sym == "CPIHU"             ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "CPIT"              ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "HIRYY"             ? "EUROSTAT - Avrupa İstatistik Ofisi"                            :
-  data_sym == "GDG"               ? "Hazine Müsteşarlığı"                                           :
-  data_sym == "GBP"               ? "T.C. Hazine ve Maliye Bakanlığı"                               :
-  data_sym == "GBV"               ? "Hazine Müsteşarlığı"                                           :
-  data_sym == "GR"                ? "Hazine Müsteşarlığı"                                           :
-  data_sym == "GSP"               ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "GD"                ? "Hazine Müsteşarlığı"                                           :
-  data_sym == "FE"                ? "Hazine Müsteşarlığı"                                           :
-  data_sym == "ME"                ? "SIPRI - Stockholm Uluslararası Barış Araştırmaları Enstitüsü"  :
-  data_sym == "AA"                ? "UNHCR - Birleşmiş Milletler Mülteciler Yüksek Komiserliği"     :
-  data_sym == "EXP"               ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "IMP"               ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "TOT"               ? "T.C. Merkez Bankası"                                           :
-  data_sym == "NGI"               ? "EUROSTAT - Avrupa İstatistik Ofisi"                            :
-  data_sym == "COIR"              ? "EUROSTAT - Avrupa İstatistik Ofisi"                            :
-  data_sym == "NGIR"              ? "EUROSTAT - Avrupa İstatistik Ofisi"                            :
-  data_sym == "CAG"               ? "T.C. Merkez Bankası"                                           :
-  data_sym == "CF"                ? "T.C. Merkez Bankası"                                           :
-  data_sym == "FDI"               ? "T.C. Merkez Bankası"                                           :
-  data_sym == "REM"               ? "T.C. Merkez Bankası"                                           :
-  data_sym == "COP"               ? "EIA - ABD Enerji Bilgi Yönetim İdaresi"                        :
-  data_sym == "TR"                ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "TA"                ? "TC. Kültür ve Turizm Bakanlığı"                                :
-  data_sym == "WES"               ? "SIPRI - Stockholm Uluslararası Barış Araştırmaları Enstitüsü"  :
-  data_sym == "TI"                ? "IEP - Ekonomi ve Barış Enstitüsü"                              :
-  data_sym == "BCOI"              ? "T.C. Merkez Bankası"                                           :
-  data_sym == "CU"                ? "T.C. Merkez Bankası"                                           :
-  data_sym == "EDBR"              ? "WB - Dünya Bankası"                                            :
-  data_sym == "IC"                ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "LEI"               ? "T.C. Merkez Bankası"                                           :
-  data_sym == "ELP"               ? "EUROSTAT - Avrupa İstatistik Ofisi"                            :
-  data_sym == "MIP"               ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "SP"                ? "WSA - Dünya Çelik Birliği"                                     :
-  data_sym == "IPMM"              ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "IPYY"              ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "MPRYY"             ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "BR"                ? "Türkiye Odalar ve Borsalar Birliği"                            :
-  data_sym == "CAP"               ? "OSD - Otomobil Üreticileri Birliği"                            :
-  data_sym == "TVS"               ? "OSD - Otomobil Üreticileri Birliği"                            :
-  data_sym == "CAR"               ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "MPMI"              ? "S&P Global"                                                    :
-  data_sym == "EMP"               ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "FTE"               ? "EUROSTAT - Avrupa İstatistik Ofisi"                            :
-  data_sym == "PTE"               ? "EUROSTAT - Avrupa İstatistik Ofisi"                            :
-  data_sym == "EMR"               ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "RAM"               ? "T.C. Çalışma ve Sosyal Güvenlik Bakanlığı"                     :
-  data_sym == "RAW"               ? "T.C. Çalışma ve Sosyal Güvenlik Bakanlığı"                     :
-  data_sym == "WM"                ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "LC"                ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "WAG"               ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "LWF"               ? "WGI - Wage Indicator Foundation"                               :
-  data_sym == "LWI"               ? "WGI - Wage Indicator Foundation"                               :
-  data_sym == "CCI"               ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "CCR"               ? "T.C. Merkez Bankası"                                           :
-  data_sym == "EOI"               ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "PSC"               ? "T.C. Merkez Bankası"                                           :
-  data_sym == "RSMM"              ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "RSYY"              ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "HDG"               ? "BIS - Uluslararası Ödemeler Bankası"                           :
-  data_sym == "GASP"              ? "Türkiye Petrolleri Anonim Ortaklığı"                           :
-  data_sym == "PITR"              ? "Gelir İdaresi Başkanlığı"                                      :
-  data_sym == "CTR"               ? "Gelir İdaresi Başkanlığı"                                      :
-  data_sym == "STR"               ? "Gelir İdaresi Başkanlığı"                                      :
-  data_sym == "SSR"               ? "T.C. Çalışma ve Sosyal Güvenlik Bakanlığı"                     :
-  data_sym == "SSRC"              ? "T.C. Çalışma ve Sosyal Güvenlik Bakanlığı"                     :
-  data_sym == "SSRE"              ? "T.C. Çalışma ve Sosyal Güvenlik Bakanlığı"                     :
-  data_sym == "HOR"               ? "EUROSTAT - Avrupa İstatistik Ofisi"                            :
-  data_sym == "HPI"               ? "T.C. Merkez Bankası"                                           :
-  data_sym == "NHS"               ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "EHS"               ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "BP"                ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "COUT"              ? "Türkiye İstatistik Kurumu"                                     :
-  data_sym == "HST"               ? "T.C. Merkez Bankası"                                           :
-  data_sym == "PRR"               ? "OECD - Ekonomik Kalkınma ve İşbirliği Örgütü"                  :
-  data_sym == "MD"                ? "OECD - Ekonomik Kalkınma ve İşbirliği Örgütü"                  :
-  data_sym == "NURS"              ? "OECD - Ekonomik Kalkınma ve İşbirliği Örgütü"                  :
-  data_sym == "HOSP"              ? "OECD - Ekonomik Kalkınma ve İşbirliği Örgütü"                  :
-  data_sym == "HB"                ? "OECD - Ekonomik Kalkınma ve İşbirliği Örgütü"                  :
-  data_sym == "ICUB"              ? "OECD - Ekonomik Kalkınma ve İşbirliği Örgütü"                  :
-  na
-//
-
-birim_ =  
-  data_sym == "POP"               ? "Person"                :
-  data_sym == "GDP"               ? "USD"                   :
-  data_sym == "GDPPC"             ? "USD"                   :
-  data_sym == "GDPPCP"            ? "USD"                   :
-  data_sym == "GDPQQ"             ? "%"                     :
-  data_sym == "IRMM"              ? "%"                     :
-  data_sym == "IRYY"              ? "%"                     :
-  data_sym == "FI"                ? "%"                     :
-  data_sym == "INTR"              ? "%"                     :
-  data_sym == "DIR"               ? "%"                     :
-  data_sym == "LR"                ? "%"                     :
-  data_sym == "MW"                ? "TRY"                   :
-  data_sym == "UR"                ? "%"                     :
-  data_sym == "UP"                ? "Person"                :
-  data_sym == "LFPR"              ? "%"                     :
-  data_sym == "LTUR"              ? "%"                     :
-  data_sym == "YUR"               ? "%"                     :
-  data_sym == "CORPI"             ? "Point"                 :
-  data_sym == "CORR"              ? "Rank"                  :
-  data_sym == "FER"               ? "USD"                   :
-  data_sym == "GRES"              ? "Ton"                   :
-  data_sym == "TCB"               ? "TRY"                   :
-  data_sym == "CPI"               ? "Point"                 :
-  data_sym == "CS"                ? "TRY"                   :
-  data_sym == "PPI"               ? "Point"                 :
-  data_sym == "PPIMM"             ? "%"                     :
-  data_sym == "PPIYY"             ? "%"                     :
-  data_sym == "CA"                ? "USD"                   :
-  data_sym == "ED"                ? "USD"                   :
-  data_sym == "BOT"               ? "USD"                   :
-  data_sym == "GFCF"              ? "TRY"                   :
-  data_sym == "GDPA"              ? "TRY"                   :
-  data_sym == "GDPC"              ? "TRY"                   :
-  data_sym == "GDPMAN"            ? "TRY"                   :
-  data_sym == "GDPPA"             ? "TRY"                   :
-  data_sym == "GDPS"              ? "TRY"                   :
-  data_sym == "FYGDPG"            ? "%"                     :
-  data_sym == "GDPCP"             ? "TRY"                   :
-  data_sym == "GDPMIN"            ? "TRY"                   :
-  data_sym == "GDPT"              ? "TRY"                   :
-  data_sym == "GDPU"              ? "TRY"                   :
-  data_sym == "GDPYY"             ? "%"                     :
-  data_sym == "NAEXKP01TRQ652S"   ? "TRY"                   :
-  data_sym == "GNP"               ? "TRY"                   :
-  data_sym == "CBBS"              ? "TRY"                   :
-  data_sym == "CRR"               ? "%"                     :
-  data_sym == "BBS"               ? "TRY"                   :
-  data_sym == "FSI"               ? "USD"                   :
-  data_sym == "M1"                ? "TRY"                   :
-  data_sym == "M2"                ? "TRY"                   :
-  data_sym == "M3"                ? "TRY"                   :
-  data_sym == "LPS"               ? "TRY"                   :
-  data_sym == "INBR"              ? "%"                     :
-  data_sym == "INTDSRTRM193N"     ? "%"                     :
-  data_sym == "PDG"               ? "%"                     :
-  data_sym == "EP"                ? "Point"                 :
-  data_sym == "IPRI"              ? "Point"                 :
-  data_sym == "CCP"               ? "Point"                 :
-  data_sym == "GDPD"              ? "Point"                 :
-  data_sym == "CIR"               ? "%"                     :
-  data_sym == "HIRMM"             ? "%"                     :
-  data_sym == "HICP"              ? "Point"                 :
-  data_sym == "TURCPIALLMINMEI"   ? "Point"                 :
-  data_sym == "CPIHU"             ? "Point"                 :
-  data_sym == "CPIT"              ? "Point"                 :
-  data_sym == "HIRYY"             ? "%"                     :
-  data_sym == "GDG"               ? "%"                     :
-  data_sym == "GBP"               ? "%"                     :
-  data_sym == "GBV"               ? "TRY"                   :
-  data_sym == "GR"                ? "TRY"                   :
-  data_sym == "GSP"               ? "TRY"                   :
-  data_sym == "GD"                ? "TRY"                   :
-  data_sym == "FE"                ? "TRY"                   :
-  data_sym == "ME"                ? "USD"                   :
-  data_sym == "AA"                ? "Person"                :
-  data_sym == "EXP"               ? "USD"                   :
-  data_sym == "IMP"               ? "USD"                   :
-  data_sym == "TOT"               ? "Point"                 :
-  data_sym == "NGI"               ? "Joule"                 :
-  data_sym == "COIR"              ? "Ton"                   :
-  data_sym == "NGIR"              ? "Joule"                 :
-  data_sym == "CAG"               ? "%"                     :
-  data_sym == "CF"                ? "USD"                   :
-  data_sym == "FDI"               ? "USD"                   :
-  data_sym == "REM"               ? "USD"                   :
-  data_sym == "COP"               ? "Barrel (Us)"           :
-  data_sym == "TR"                ? "USD"                   :
-  data_sym == "TA"                ? "Person"                :
-  data_sym == "WES"               ? "Sipri Tiv (USD)"       :
-  data_sym == "TI"                ? "Point"                 :
-  data_sym == "BCOI"              ? "Point"                 :
-  data_sym == "CU"                ? "%"                     :
-  data_sym == "EDBR"              ? "Point"                 :
-  data_sym == "IC"                ? "TRY"                   :
-  data_sym == "LEI"               ? "%"                     :
-  data_sym == "ELP"               ? "Gwh"                   :
-  data_sym == "MIP"               ? "%"                     :
-  data_sym == "SP"                ? "Ton"                   :
-  data_sym == "IPMM"              ? "%"                     :
-  data_sym == "IPYY"              ? "%"                     :
-  data_sym == "MPRYY"             ? "%"                     :
-  data_sym == "BR"                ? "Company"               :
-  data_sym == "CAP"               ? "Unit"                  :
-  data_sym == "TVS"               ? "Unit"                  :
-  data_sym == "CAR"               ? "Unit"                  :
-  data_sym == "MPMI"              ? "Point"                 :
-  data_sym == "EMP"               ? "Person"                :
-  data_sym == "FTE"               ? "Person"                :
-  data_sym == "PTE"               ? "Person"                :
-  data_sym == "EMR"               ? "%"                     :
-  data_sym == "RAM"               ? "Year"                  :
-  data_sym == "RAW"               ? "Year"                  :
-  data_sym == "WM"                ? "Point"                 :
-  data_sym == "LC"                ? "Point"                 :
-  data_sym == "WAG"               ? "TRY"                   :
-  data_sym == "LWF"               ? "TRY"                   :
-  data_sym == "LWI"               ? "TRY"                   :
-  data_sym == "CCI"               ? "Point"                 :
-  data_sym == "CCR"               ? "TRY"                   :
-  data_sym == "EOI"               ? "Point"                 :
-  data_sym == "PSC"               ? "TRY"                   :
-  data_sym == "RSMM"              ? "%"                     :
-  data_sym == "RSYY"              ? "%"                     :
-  data_sym == "HDG"               ? "%"                     :
-  data_sym == "GASP"              ? "USD / Litre"           :
-  data_sym == "PITR"              ? "%"                     :
-  data_sym == "CTR"               ? "%"                     :
-  data_sym == "STR"               ? "%"                     :
-  data_sym == "SSR"               ? "%"                     :
-  data_sym == "SSRC"              ? "%"                     :
-  data_sym == "SSRE"              ? "%"                     :
-  data_sym == "HOR"               ? "%"                     :
-  data_sym == "HPI"               ? "Point"                 :
-  data_sym == "NHS"               ? "Unit"                  :
-  data_sym == "EHS"               ? "Unit"                  :
-  data_sym == "BP"                ? "Unit"                  :
-  data_sym == "COUT"              ? "%"                     :
-  data_sym == "HST"               ? "Unit"                  :
-  data_sym == "PRR"               ? "Ratio"                 :
-  data_sym == "MD"                ? "Per 1000 People"       :
-  data_sym == "NURS"              ? "Per 1000 People"       :
-  data_sym == "HOSP"              ? "Per 1 Million People"  :
-  data_sym == "HB"                ? "Per 1000 People"       :
-  data_sym == "ICUB"              ? "Per 1000 People"       :
-  na
-//
-
-// Functions
-
-f_dig(x) =>
+f_dig(x, y) =>
     w = 10e17
     q = 10e14
     t = 10e11
     b = 10e8
     m = 10e5
     k = 10e2
-    sonuc =
-      x >= w or x <= -w ? str.tostring(x/q, "#.##") + " Kentilyon" :
-      x >= q or x <= -q ? str.tostring(x/q, "#.##") + " Katrilyon" :
-      x >= t or x <= -t ? str.tostring(x/t, "#.##") + " Trilyon"   :
-      x >= b or x <= -b ? str.tostring(x/b, "#.##") + " Milyar"    :
-      x >= m or x <= -m ? str.tostring(x/m, "#.##") + " Milyon"    : 
-      x >= k or x <= -k ? str.tostring(x/k, "#.##") + " Bin"       : 
-      str.tostring(x, "#.##")
+    d = 
+      y == 0 ? "#" : 
+      y == 1 ? "#.#" : 
+      y == 2 ? "#.##" : 
+      y == 3 ? "#.###" : 
+      y == 4 ? "#.####" : 
+      y == 5 ? "#.#####" : 
+      y == 6 ? "#.######" : 
+      y == 7 ? "#.#######" : 
+      y == 8 ? "#.########" : na    
+    r =
+      x >= w or x <= -w ? str.tostring(x / q, d) + " Kentilyon" :
+      x >= q or x <= -q ? str.tostring(x / q, d) + " Katrilyon" :
+      x >= t or x <= -t ? str.tostring(x / t, d) + " Trilyon"   :
+      x >= b or x <= -b ? str.tostring(x / b, d) + " Milyar"    :
+      x >= m or x <= -m ? str.tostring(x / m, d) + " Milyon"    : 
+      x >= k or x <= -k ? str.tostring(x / k, d) + " Bin"       : 
+      str.tostring(x, d)
 //
 
-f_style(x) => 
-      x == "Çizgi"          ? plot.style_line             : 
-      x == "İşaretli Çizgi" ? plot.style_line             : 
-      x == "Histogram"      ? plot.style_histogram        : 
-      x == "Sütun"          ? plot.style_columns          : 
-      x == "Alan"           ? plot.style_area             : 
-      x == "Nokta"          ? plot.style_circles          : 
-      x == "Step"           ? plot.style_stepline_diamond : 
-      na
+// VARIABLES
+ulke_sym = f_get(ulke, "[", "]")
+data_sym = f_get(data, "[", "]")
+
+kaynak_kurum = 
+  data_sym == "POP"             ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "GDP"             ? "WB - Dünya Bankası"                                            :
+  data_sym == "GDPPC"           ? "WB - Dünya Bankası"                                            :
+  data_sym == "GDPPCP"          ? "WB - Dünya Bankası"                                            :
+  data_sym == "GDPQQ"           ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "IRMM"            ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "IRYY"            ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "FI"              ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "INTR"            ? "T.C. Merkez Bankası"                                           :
+  data_sym == "DIR"             ? "T.C. Merkez Bankası"                                           :
+  data_sym == "LR"              ? "T.C. Merkez Bankası"                                           :
+  data_sym == "MW"              ? "T.C. Çalışma ve Sosyal Güvenlik Bakanlığı"                     :
+  data_sym == "UR"              ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "UP"              ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "LFPR"            ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "LTUR"            ? "EUROSTAT - Avrupa İstatistik Ofisi"                            :
+  data_sym == "YUR"             ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "CORPI"           ? "TI - Uluslararası Şeffaflık Örgütü"                            :
+  data_sym == "CORR"            ? "TI - Uluslararası Şeffaflık Örgütü"                            :
+  data_sym == "FER"             ? "T.C. Merkez Bankası"                                           :
+  data_sym == "GRES"            ? "WGC - Dünya Altın Konseyi"                                     :
+  data_sym == "TCB"             ? "Hazine Müsteşarlığı"                                           :
+  data_sym == "CPI"             ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "CS"              ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "PPI"             ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "PPIMM"           ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "PPIYY"           ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "CA"              ? "T.C. Merkez Bankası"                                           :
+  data_sym == "ED"              ? "Hazine Müsteşarlığı"                                           :
+  data_sym == "BOT"             ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "GFCF"            ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "GDPA"            ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "GDPC"            ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "GDPMAN"          ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "GDPPA"           ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "GDPS"            ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "FYGDPG"          ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "GDPCP"           ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "GDPMIN"          ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "GDPT"            ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "GDPU"            ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "GDPYY"           ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "NAEXKP01TRQ652S" ? "OECD - Ekonomik Kalkınma ve İşbirliği Örgütü"                  :
+  data_sym == "GNP"             ? "T.C. Merkez Bankası"                                           :
+  data_sym == "CBBS"            ? "T.C. Merkez Bankası"                                           :
+  data_sym == "CRR"             ? "T.C. Merkez Bankası"                                           :
+  data_sym == "BBS"             ? "T.C. Merkez Bankası"                                           :
+  data_sym == "FSI"             ? "T.C. Merkez Bankası"                                           :
+  data_sym == "M1"              ? "T.C. Merkez Bankası"                                           :
+  data_sym == "M2"              ? "T.C. Merkez Bankası"                                           :
+  data_sym == "M3"              ? "T.C. Merkez Bankası"                                           :
+  data_sym == "LPS"             ? "T.C. Merkez Bankası"                                           :
+  data_sym == "INBR"            ? "Banks Association"                                             :
+  data_sym == "INTDSRTRM193N"   ? "IMF - Uluslararası Para Fonu"                                  :
+  data_sym == "PDG"             ? "OECD - Ekonomik Kalkınma ve İşbirliği Örgütü"                  :
+  data_sym == "EP"              ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "IPRI"            ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "CCP"             ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "GDPD"            ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "CIR"             ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "HIRMM"           ? "EUROSTAT - Avrupa İstatistik Ofisi"                            :
+  data_sym == "HICP"            ? "EUROSTAT - Avrupa İstatistik Ofisi"                            :
+  data_sym == "TURCPIALLMINMEI" ? "OECD - Ekonomik Kalkınma ve İşbirliği Örgütü"                  :
+  data_sym == "CPIHU"           ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "CPIT"            ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "HIRYY"           ? "EUROSTAT - Avrupa İstatistik Ofisi"                            :
+  data_sym == "GDG"             ? "Hazine Müsteşarlığı"                                           :
+  data_sym == "GBP"             ? "T.C. Hazine ve Maliye Bakanlığı"                               :
+  data_sym == "GBV"             ? "Hazine Müsteşarlığı"                                           :
+  data_sym == "GR"              ? "Hazine Müsteşarlığı"                                           :
+  data_sym == "GSP"             ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "GD"              ? "Hazine Müsteşarlığı"                                           :
+  data_sym == "FE"              ? "Hazine Müsteşarlığı"                                           :
+  data_sym == "ME"              ? "SIPRI - Stockholm Uluslararası Barış Araştırmaları Enstitüsü"  :
+  data_sym == "AA"              ? "UNHCR - Birleşmiş Milletler Mülteciler Yüksek Komiserliği"     :
+  data_sym == "EXP"             ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "IMP"             ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "TOT"             ? "T.C. Merkez Bankası"                                           :
+  data_sym == "NGI"             ? "EUROSTAT - Avrupa İstatistik Ofisi"                            :
+  data_sym == "COIR"            ? "EUROSTAT - Avrupa İstatistik Ofisi"                            :
+  data_sym == "NGIR"            ? "EUROSTAT - Avrupa İstatistik Ofisi"                            :
+  data_sym == "CAG"             ? "T.C. Merkez Bankası"                                           :
+  data_sym == "CF"              ? "T.C. Merkez Bankası"                                           :
+  data_sym == "FDI"             ? "T.C. Merkez Bankası"                                           :
+  data_sym == "REM"             ? "T.C. Merkez Bankası"                                           :
+  data_sym == "COP"             ? "EIA - ABD Enerji Bilgi Yönetim İdaresi"                        :
+  data_sym == "TR"              ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "TA"              ? "TC. Kültür ve Turizm Bakanlığı"                                :
+  data_sym == "WES"             ? "SIPRI - Stockholm Uluslararası Barış Araştırmaları Enstitüsü"  :
+  data_sym == "TI"              ? "IEP - Ekonomi ve Barış Enstitüsü"                              :
+  data_sym == "BCOI"            ? "T.C. Merkez Bankası"                                           :
+  data_sym == "CU"              ? "T.C. Merkez Bankası"                                           :
+  data_sym == "EDBR"            ? "WB - Dünya Bankası"                                            :
+  data_sym == "IC"              ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "LEI"             ? "T.C. Merkez Bankası"                                           :
+  data_sym == "ELP"             ? "EUROSTAT - Avrupa İstatistik Ofisi"                            :
+  data_sym == "MIP"             ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "SP"              ? "WSA - Dünya Çelik Birliği"                                     :
+  data_sym == "IPMM"            ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "IPYY"            ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "MPRYY"           ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "BR"              ? "Türkiye Odalar ve Borsalar Birliği"                            :
+  data_sym == "CAP"             ? "OSD - Otomobil Üreticileri Birliği"                            :
+  data_sym == "TVS"             ? "OSD - Otomobil Üreticileri Birliği"                            :
+  data_sym == "CAR"             ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "MPMI"            ? "S&P Global"                                                    :
+  data_sym == "EMP"             ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "FTE"             ? "EUROSTAT - Avrupa İstatistik Ofisi"                            :
+  data_sym == "PTE"             ? "EUROSTAT - Avrupa İstatistik Ofisi"                            :
+  data_sym == "EMR"             ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "RAM"             ? "T.C. Çalışma ve Sosyal Güvenlik Bakanlığı"                     :
+  data_sym == "RAW"             ? "T.C. Çalışma ve Sosyal Güvenlik Bakanlığı"                     :
+  data_sym == "WM"              ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "LC"              ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "WAG"             ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "LWF"             ? "WGI - Wage Indicator Foundation"                               :
+  data_sym == "LWI"             ? "WGI - Wage Indicator Foundation"                               :
+  data_sym == "CCI"             ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "CCR"             ? "T.C. Merkez Bankası"                                           :
+  data_sym == "EOI"             ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "PSC"             ? "T.C. Merkez Bankası"                                           :
+  data_sym == "RSMM"            ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "RSYY"            ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "HDG"             ? "BIS - Uluslararası Ödemeler Bankası"                           :
+  data_sym == "GASP"            ? "Türkiye Petrolleri Anonim Ortaklığı"                           :
+  data_sym == "PITR"            ? "Gelir İdaresi Başkanlığı"                                      :
+  data_sym == "CTR"             ? "Gelir İdaresi Başkanlığı"                                      :
+  data_sym == "STR"             ? "Gelir İdaresi Başkanlığı"                                      :
+  data_sym == "SSR"             ? "T.C. Çalışma ve Sosyal Güvenlik Bakanlığı"                     :
+  data_sym == "SSRC"            ? "T.C. Çalışma ve Sosyal Güvenlik Bakanlığı"                     :
+  data_sym == "SSRE"            ? "T.C. Çalışma ve Sosyal Güvenlik Bakanlığı"                     :
+  data_sym == "HOR"             ? "EUROSTAT - Avrupa İstatistik Ofisi"                            :
+  data_sym == "HPI"             ? "T.C. Merkez Bankası"                                           :
+  data_sym == "NHS"             ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "EHS"             ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "BP"              ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "COUT"            ? "Türkiye İstatistik Kurumu"                                     :
+  data_sym == "HST"             ? "T.C. Merkez Bankası"                                           :
+  data_sym == "PRR"             ? "OECD - Ekonomik Kalkınma ve İşbirliği Örgütü"                  :
+  data_sym == "MD"              ? "OECD - Ekonomik Kalkınma ve İşbirliği Örgütü"                  :
+  data_sym == "NURS"            ? "OECD - Ekonomik Kalkınma ve İşbirliği Örgütü"                  :
+  data_sym == "HOSP"            ? "OECD - Ekonomik Kalkınma ve İşbirliği Örgütü"                  :
+  data_sym == "HB"              ? "OECD - Ekonomik Kalkınma ve İşbirliği Örgütü"                  :
+  data_sym == "ICUB"            ? "OECD - Ekonomik Kalkınma ve İşbirliği Örgütü"                  :
+  na
 //
 
-f_size(x) =>
-      x == "Küçük"  ? size.small  : 
-      x == 'Normal' ? size.normal : 
-      x == "Büyük"  ? size.large  :
-      na 
+birim_ =  
+  data_sym == "POP"             ? "Person"               :
+  data_sym == "GDP"             ? "USD"                  :
+  data_sym == "GDPPC"           ? "USD"                  :
+  data_sym == "GDPPCP"          ? "USD"                  :
+  data_sym == "GDPQQ"           ? "%"                    :
+  data_sym == "IRMM"            ? "%"                    :
+  data_sym == "IRYY"            ? "%"                    :
+  data_sym == "FI"              ? "%"                    :
+  data_sym == "INTR"            ? "%"                    :
+  data_sym == "DIR"             ? "%"                    :
+  data_sym == "LR"              ? "%"                    :
+  data_sym == "MW"              ? "TRY"                  :
+  data_sym == "UR"              ? "%"                    :
+  data_sym == "UP"              ? "Person"               :
+  data_sym == "LFPR"            ? "%"                    :
+  data_sym == "LTUR"            ? "%"                    :
+  data_sym == "YUR"             ? "%"                    :
+  data_sym == "CORPI"           ? "Point"                :
+  data_sym == "CORR"            ? "Rank"                 :
+  data_sym == "FER"             ? "USD"                  :
+  data_sym == "GRES"            ? "Ton"                  :
+  data_sym == "TCB"             ? "TRY"                  :
+  data_sym == "CPI"             ? "Point"                :
+  data_sym == "CS"              ? "TRY"                  :
+  data_sym == "PPI"             ? "Point"                :
+  data_sym == "PPIMM"           ? "%"                    :
+  data_sym == "PPIYY"           ? "%"                    :
+  data_sym == "CA"              ? "USD"                  :
+  data_sym == "ED"              ? "USD"                  :
+  data_sym == "BOT"             ? "USD"                  :
+  data_sym == "GFCF"            ? "TRY"                  :
+  data_sym == "GDPA"            ? "TRY"                  :
+  data_sym == "GDPC"            ? "TRY"                  :
+  data_sym == "GDPMAN"          ? "TRY"                  :
+  data_sym == "GDPPA"           ? "TRY"                  :
+  data_sym == "GDPS"            ? "TRY"                  :
+  data_sym == "FYGDPG"          ? "%"                    :
+  data_sym == "GDPCP"           ? "TRY"                  :
+  data_sym == "GDPMIN"          ? "TRY"                  :
+  data_sym == "GDPT"            ? "TRY"                  :
+  data_sym == "GDPU"            ? "TRY"                  :
+  data_sym == "GDPYY"           ? "%"                    :
+  data_sym == "NAEXKP01TRQ652S" ? "TRY"                  :
+  data_sym == "GNP"             ? "TRY"                  :
+  data_sym == "CBBS"            ? "TRY"                  :
+  data_sym == "CRR"             ? "%"                    :
+  data_sym == "BBS"             ? "TRY"                  :
+  data_sym == "FSI"             ? "USD"                  :
+  data_sym == "M1"              ? "TRY"                  :
+  data_sym == "M2"              ? "TRY"                  :
+  data_sym == "M3"              ? "TRY"                  :
+  data_sym == "LPS"             ? "TRY"                  :
+  data_sym == "INBR"            ? "%"                    :
+  data_sym == "INTDSRTRM193N"   ? "%"                    :
+  data_sym == "PDG"             ? "%"                    :
+  data_sym == "EP"              ? "Point"                :
+  data_sym == "IPRI"            ? "Point"                :
+  data_sym == "CCP"             ? "Point"                :
+  data_sym == "GDPD"            ? "Point"                :
+  data_sym == "CIR"             ? "%"                    :
+  data_sym == "HIRMM"           ? "%"                    :
+  data_sym == "HICP"            ? "Point"                :
+  data_sym == "TURCPIALLMINMEI" ? "Point"                :
+  data_sym == "CPIHU"           ? "Point"                :
+  data_sym == "CPIT"            ? "Point"                :
+  data_sym == "HIRYY"           ? "%"                    :
+  data_sym == "GDG"             ? "%"                    :
+  data_sym == "GBP"             ? "%"                    :
+  data_sym == "GBV"             ? "TRY"                  :
+  data_sym == "GR"              ? "TRY"                  :
+  data_sym == "GSP"             ? "TRY"                  :
+  data_sym == "GD"              ? "TRY"                  :
+  data_sym == "FE"              ? "TRY"                  :
+  data_sym == "ME"              ? "USD"                  :
+  data_sym == "AA"              ? "Person"               :
+  data_sym == "EXP"             ? "USD"                  :
+  data_sym == "IMP"             ? "USD"                  :
+  data_sym == "TOT"             ? "Point"                :
+  data_sym == "NGI"             ? "Joule"                :
+  data_sym == "COIR"            ? "Ton"                  :
+  data_sym == "NGIR"            ? "Joule"                :
+  data_sym == "CAG"             ? "%"                    :
+  data_sym == "CF"              ? "USD"                  :
+  data_sym == "FDI"             ? "USD"                  :
+  data_sym == "REM"             ? "USD"                  :
+  data_sym == "COP"             ? "Barrel (Us)"          :
+  data_sym == "TR"              ? "USD"                  :
+  data_sym == "TA"              ? "Person"               :
+  data_sym == "WES"             ? "Sipri Tiv (USD)"      :
+  data_sym == "TI"              ? "Point"                :
+  data_sym == "BCOI"            ? "Point"                :
+  data_sym == "CU"              ? "%"                    :
+  data_sym == "EDBR"            ? "Point"                :
+  data_sym == "IC"              ? "TRY"                  :
+  data_sym == "LEI"             ? "%"                    :
+  data_sym == "ELP"             ? "Gwh"                  :
+  data_sym == "MIP"             ? "%"                    :
+  data_sym == "SP"              ? "Ton"                  :
+  data_sym == "IPMM"            ? "%"                    :
+  data_sym == "IPYY"            ? "%"                    :
+  data_sym == "MPRYY"           ? "%"                    :
+  data_sym == "BR"              ? "Company"              :
+  data_sym == "CAP"             ? "Unit"                 :
+  data_sym == "TVS"             ? "Unit"                 :
+  data_sym == "CAR"             ? "Unit"                 :
+  data_sym == "MPMI"            ? "Point"                :
+  data_sym == "EMP"             ? "Person"               :
+  data_sym == "FTE"             ? "Person"               :
+  data_sym == "PTE"             ? "Person"               :
+  data_sym == "EMR"             ? "%"                    :
+  data_sym == "RAM"             ? "Year"                 :
+  data_sym == "RAW"             ? "Year"                 :
+  data_sym == "WM"              ? "Point"                :
+  data_sym == "LC"              ? "Point"                :
+  data_sym == "WAG"             ? "TRY"                  :
+  data_sym == "LWF"             ? "TRY"                  :
+  data_sym == "LWI"             ? "TRY"                  :
+  data_sym == "CCI"             ? "Point"                :
+  data_sym == "CCR"             ? "TRY"                  :
+  data_sym == "EOI"             ? "Point"                :
+  data_sym == "PSC"             ? "TRY"                  :
+  data_sym == "RSMM"            ? "%"                    :
+  data_sym == "RSYY"            ? "%"                    :
+  data_sym == "HDG"             ? "%"                    :
+  data_sym == "GASP"            ? "USD / Litre"          :
+  data_sym == "PITR"            ? "%"                    :
+  data_sym == "CTR"             ? "%"                    :
+  data_sym == "STR"             ? "%"                    :
+  data_sym == "SSR"             ? "%"                    :
+  data_sym == "SSRC"            ? "%"                    :
+  data_sym == "SSRE"            ? "%"                    :
+  data_sym == "HOR"             ? "%"                    :
+  data_sym == "HPI"             ? "Point"                :
+  data_sym == "NHS"             ? "Unit"                 :
+  data_sym == "EHS"             ? "Unit"                 :
+  data_sym == "BP"              ? "Unit"                 :
+  data_sym == "COUT"            ? "%"                    :
+  data_sym == "HST"             ? "Unit"                 :
+  data_sym == "PRR"             ? "Ratio"                :
+  data_sym == "MD"              ? "Per 1000 People"      :
+  data_sym == "NURS"            ? "Per 1000 People"      :
+  data_sym == "HOSP"            ? "Per 1 Million People" :
+  data_sym == "HB"              ? "Per 1000 People"      :
+  data_sym == "ICUB"            ? "Per 1000 People"      :
+  na
 //
 
-// Inputs
-gr_k    = "KONFİGÜRASYON"
-pb      = input.string(title="Para Birimi", options=["USD", "EUR", "TRY"], defval="USD", group=gr_k)
-stil    = input.string(title="Çizim Tercihi", options=[
-  "Çizgi", "İşaretli Çizgi", "Histogram", "Sütun", "Alan", "Step", "Nokta"], defval="İşaretli Çizgi", group=gr_k)
-size    = input.string(title="Yazı Boyutu", options=["Küçük", "Normal", "Büyük"], defval="Normal", group=gr_k)
-renk_d  = input.color(title="Renk", defval=#2962ff, group=gr_k)
-tablo_g = input.bool(title="Bilgi Paneli", defval=true, group=gr_k)
-renk_b  = #686868
-
-// Calcs
 sembol = 
   data_sym == "NAEXKP01TRQ652S" or 
   data_sym == "INTDSRTRM193N"   or 
   data_sym == "TURCPIALLMINMEI" ? 
   "FRED:" + data_sym : 
   "ECONOMICS:" + ulke_sym + data_sym
-r           = request.security(sembol, "", close, ignore_invalid_symbol=true, currency=pb)
-sonuc       = f_dig(r)
-sonuc_      = str.tostring(r, "###,###,###,###,###,###,###.##")
-son_degisim = str.format_time(ta.valuewhen(r!=r[1], time, 0), "dd.MM.yyyy", 'GMT+3')
-birim       = birim_ == "USD" or birim_ == "TRY" ? pb : birim_
-kaynak      = ulke == "Türkiye" ? kaynak_kurum : "..."
+_return     = request.security(sembol, "", close, ignore_invalid_symbol=true, currency=para_birimi)
+sonuc       = f_dig(_return, hassasiyet)
+sonuc_      = str.tostring(_return, "###,###,###,###,###,###,###.##")
+son_degisim = str.format_time(ta.valuewhen(_return!=_return[1], time, 0), "dd.MM.yyyy", 'GMT+3')
+birim       = birim_ == "USD" or birim_ == "TRY" ? para_birimi : birim_
+kaynak      = ulke == "1. Türkiye [TR]" ? kaynak_kurum : "..."
 description = request.security(sembol, "", syminfo.description) 
 
-// Info Panel
+// PLOT
+plot(_return, "Return", #2962ff)
+
+// INFO PANEL
 var table tablo = table.new(position=position.top_right, columns=3, rows=15)
 f_tb(x, y, c, s, t) =>
-    table.cell(tablo, x-1, y-1, t, text_color=c, text_halign=s=="l" ? text.align_left : text.align_right, text_size=f_size(size))
-if barstate.islast and tablo_g
-    i = "" + "\n\nÜlke\n\nData\n\nBirim\n\nSonuç\n\n" + "" + "\n\nDescription\n\nSon Değişim\n\nKaynak\n\nSembol"
-    ii = "" + "\n\n : \n\n : \n\n : \n\n : \n\n" + "" + "\n\n : \n\n : \n\n : \n\n : "
-    iii = "" + "\n\n" + ulke + "\n\n" + data + "\n\n" + birim + "\n\n" + sonuc + "\n\n[" + sonuc_ + "]\n\n" + 
-      description + " (" + data_sym + ")\n\n" + son_degisim + "\n\n" + kaynak + "\n\n" + sembol
-    f_tb(1, 1, renk_b, "", i)
-    f_tb(2, 1, renk_b, "", ii)
-    f_tb(3, 1, renk_d, "l", iii)
+    table.cell(tablo, x-1, y-1, t, text_color=c, text_halign=s=="l" ? text.align_left : text.align_right)
+if barstate.islast and tablo_sh
+    i = "" + "\n\nDescription\n\nÜlke\n\nData\n\nBirim\n\nSonuç\n\n" + "" + "\n\nSon Değişim\n\nKaynak\n\nSembol"
+    ii = "" + "\n\n : \n\n : \n\n : \n\n : \n\n : \n\n" + "" + "\n\n : \n\n : \n\n : "
+    iii = "" + "\n\n" + description + " (" + data_sym + ")\n\n" + f_get(ulke, ". ", " [") + "\n\n" + f_get(data, ". ", " [") + "\n\n" + 
+      birim + "\n\n" + sonuc + "\n\n[" + sonuc_ + "]" + "\n\n" + son_degisim + "\n\n" + kaynak + "\n\n" + sembol
+    f_tb(1, 1, renk_baslik, "", i)
+    f_tb(2, 1, renk_baslik, "", ii)
+    f_tb(3, 1, renk_data, "l", iii)
 //
 
-// Plots
-plot(r, "Sonuç", renk_d, stil == "Nokta" ? 3 : 1, f_style(stil), editable=false)
-plot(stil == "İşaretli Çizgi" ? r : na, "", renk_d, 3, plot.style_circles, editable=false)
+// WARNING
+uyari_k = string(syminfo.tickerid) != "FX:USDTRY" or (not (timeframe.ismonthly and timeframe.multiplier == 6))
+var table tb_uyari = table.new(position.middle_left, 1, 1)
+if barstate.islast and uyari_k and uyari_sh
+    table.cell(tb_uyari, 0, 0, uyari_t, text_color=#686868, text_halign=text.align_left, text_font_family=font.family_monospace)
+//
+
+// BOLLINGER BAND
+[middle, upper, lower] = request.security(sembol, "", ta.bb(close, bb_u, bb_k), ignore_invalid_symbol=true, currency=para_birimi)
+up = plot(not bb_g ? na : upper,  title="BB Upper",  color=#2962ff50)
+plot(not bb_g ? na : middle, title="Ortalama", color=#ff9800)
+lo = plot(not bb_g ? na : lower,  title="BB Lower",  color=#2962ff50)
+fill(up, lo, #2962ff10, title="BB")
 
 // Bitti
-plotshape(barstate.isfirst, title="@ dg_factor", location=location.top, color=#13172200, editable=false)
+plotshape(barstate.isfirst, "@ dg_factor", shape.flag, location.bottom, #00000000, editable=false)
 
 // DİĞER AÇIKLAMALAR
 // Data tanımlanırken time frame ve lokal para birimi sorunları nedeniyle request.economic() fonksiyonu kullanılmadı.
